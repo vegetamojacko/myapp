@@ -1,5 +1,9 @@
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../main.dart';
+import '../providers/user_provider.dart';
 
 class SubscriptionCard extends StatelessWidget {
   final String title;
@@ -65,7 +69,18 @@ class SubscriptionCard extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                final plan = {
+                  'name': title,
+                  'price': price,
+                  'benefits': features.join(', '),
+                };
+                Provider.of<UserProvider>(context, listen: false)
+                    .updateSelectedPlan(plan);
+
+                // Pop the current screen and navigate to the HomeScreen
+                navigatorKey.currentState?.popUntil((route) => route.isFirst);
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: color,
                 shape: RoundedRectangleBorder(

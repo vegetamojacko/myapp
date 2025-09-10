@@ -49,9 +49,10 @@ class _AddClaimFormState extends State<AddClaimForm> {
         ticketCost: double.parse(_ticketCostController.text),
         eventDate: _selectedDate,
         numTickets: int.parse(_numTicketsController.text),
-        submittedDate: DateTime.now().toIso8601String(), // Corrected: Convert DateTime to String
+        submittedDate: DateTime.now().toIso8601String(),
         totalAmount: double.parse(_ticketCostController.text) *
             int.parse(_numTicketsController.text),
+        status: 'Pending', // Add this line
       );
       context.read<ClaimsBloc>().add(AddClaim(newClaim));
       Navigator.of(context).pop();

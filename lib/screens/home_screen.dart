@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
 import '../blocs/claims/claims_bloc.dart';
 import '../blocs/claims/claims_state.dart';
+import '../providers/user_provider.dart';
 import '../widgets/add_claim_form.dart';
 import '../widgets/claim_item.dart';
+import 'car_wash_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -46,7 +49,7 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   _buildUserProfileCard(),
                   const SizedBox(height: 32.0),
-                  _buildPlanCard(),
+                  _buildPlanCard(context),
                 ],
               ),
             ),
@@ -69,7 +72,7 @@ class HomeScreen extends StatelessWidget {
         const SizedBox(height: 24.0),
         _buildUserProfileCard(),
         const SizedBox(height: 32.0),
-        _buildPlanCard(),
+        _buildPlanCard(context),
         const SizedBox(height: 32.0),
         _buildClaimsSection(context),
       ],
@@ -112,22 +115,24 @@ class HomeScreen extends StatelessWidget {
                 child: Text('U', style: TextStyle(fontSize: 32, color: Colors.white)),
               ),
               const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Alex Doe',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600, // Corrected: semibold
-                      color: Colors.grey[900],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Alex Doe',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600, // Corrected: semibold
+                        color: Colors.grey[900],
+                      ),
                     ),
-                  ),
-                  Text(
-                    'alex.doe@example.com',
-                    style: TextStyle(color: Colors.grey[500]),
-                  ),
-                ],
+                    Text(
+                      'alex.doe@example.com',
+                      style: TextStyle(color: Colors.grey[500]),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -147,12 +152,17 @@ class HomeScreen extends StatelessWidget {
       children: [
         Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF4b5563))),
         const SizedBox(width: 8),
-        Text(value, style: const TextStyle(color: Color(0xFF4b5563))),
+        Expanded(
+          child: Text(value, style: const TextStyle(color: Color(0xFF4b5563))),
+        ),
       ],
     );
   }
 
-  Widget _buildPlanCard() {
+  Widget _buildPlanCard(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final plan = userProvider.selectedPlan;
+
     return DashboardCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,35 +174,53 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 4),
           const Divider(),
           const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Premium Ticket Insurance',
-                style: TextStyle(
-                  color: Color(0xFF4f46e5),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+          if (plan != null)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        plan['name'] ?? 'No Plan Selected',
+                        style: const TextStyle(
+                          color: Color(0xFF4f46e5),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    Chip(
+                      label: const Text('Active'),
+                      backgroundColor: const Color(0xFFe0e7ff),
+                      labelStyle: const TextStyle(
+                        color: Color(0xFF3730a3),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500, // Corrected: medium
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    ),
+                  ],
                 ),
-              ),
-              Chip(
-                label: const Text('Active'),
-                backgroundColor: const Color(0xFFe0e7ff),
-                labelStyle: const TextStyle(
-                  color: Color(0xFF3730a3),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500, // Corrected: medium
+                const SizedBox(height: 8),
+                Text(
+                  plan['price'] ?? '',
+                  style: TextStyle(color: Colors.grey[600], fontSize: 14, fontWeight: FontWeight.bold),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'You are covered for event cancellations, postponements, and more. Enjoy peace of mind with your premium plan.',
-            style: TextStyle(color: Colors.grey[600], fontSize: 14, height: 1.5),
-          ),
+                const SizedBox(height: 12),
+                Text(
+                  (plan['benefits'] ?? '').split(', ').take(2).join('\n'),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 14, height: 1.5),
+                ),
+              ],
+            )
+          else
+            const Text(
+              'No subscription plan selected.',
+              style: TextStyle(color: Colors.grey, fontSize: 14),
+            ),
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
@@ -217,15 +245,37 @@ class HomeScreen extends StatelessWidget {
                 'My Claims',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.grey[900]), // Corrected: semibold
               ),
-              ElevatedButton(
-                onPressed: () => _showAddClaimSheet(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4f46e5),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              Flexible(
+                child: Wrap(
+                  spacing: 8.0,
+                  runSpacing: 8.0,
+                  alignment: WrapAlignment.end,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => _showAddClaimSheet(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4f46e5),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      ),
+                      child: const Text('Make a Claim', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const CarWashScreen()),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF10b981),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      ),
+                      child: const Text('Claim Car Wash', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ],
                 ),
-                child: const Text('Make a Claim', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
             ],
           ),

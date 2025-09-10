@@ -1,3 +1,4 @@
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../models/claim.dart';
@@ -13,6 +14,8 @@ class ClaimsBloc extends Bloc<ClaimsEvent, ClaimsState> {
         super(ClaimsInitial()) {
     on<LoadClaims>(_onLoadClaims);
     on<AddClaim>(_onAddClaim);
+    on<UpdateClaim>(_onUpdateClaim);
+    on<DeleteClaim>(_onDeleteClaim);
     on<ClearClaims>(_onClearClaims);
   }
 
@@ -39,6 +42,30 @@ class ClaimsBloc extends Bloc<ClaimsEvent, ClaimsState> {
     await _storageService.saveClaims(updatedClaims);
 
     emit(ClaimsLoaded(updatedClaims));
+  }
+
+  void _onUpdateClaim(UpdateClaim event, Emitter<ClaimsState> emit) async {
+    final currentState = state;
+    if (currentState is ClaimsLoaded) {
+      final List<Claim> updatedClaims = currentState.claims.map((claim) {
+        return claim.submittedDate == event.claim.submittedDate ? event.claim : claim;
+      }).toList();
+
+      await _storageService.saveClaims(updatedClaims);
+      emit(ClaimsLoaded(updatedClaims));
+    }
+  }
+
+  void _onDeleteClaim(DeleteClaim event, Emitter<ClaimsState> emit) async {
+    final currentState = state;
+    if (currentState is ClaimsLoaded) {
+      final List<Claim> updatedClaims = currentState.claims
+          .where((claim) => claim.submittedDate != event.claim.submittedDate)
+          .toList();
+
+      await _storageService.saveClaims(updatedClaims);
+      emit(ClaimsLoaded(updatedClaims));
+    }
   }
 
   void _onClearClaims(ClearClaims event, Emitter<ClaimsState> emit) async {
