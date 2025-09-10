@@ -8,6 +8,7 @@ import '../blocs/claims/claims_bloc.dart';
 import '../blocs/claims/claims_state.dart';
 import '../models/claim.dart';
 import '../providers/navigation_provider.dart';
+import '../providers/user_provider.dart';
 import '../widgets/car_wash_claim_form.dart';
 import '../widgets/event_claim_form.dart';
 
@@ -39,6 +40,9 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildWelcomeBanner(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final plan = userProvider.selectedPlan;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24.0),
@@ -57,22 +61,62 @@ class HomeScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Welcome Back!',
+            'Welcome Back, ${userProvider.name}!',
             style: Theme.of(context)
                 .textTheme
                 .headlineSmall!
                 .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          Text(
-            'Here\'s a quick overview of your claims and benefits.',
-            style: Theme.of(context)
-                .textTheme
-                .bodyLarge!
-                .copyWith(color: Colors.white70),
-          ),
+          if (plan != null)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Current Plan: ${plan['name']}',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyLarge!
+                      .copyWith(color: Colors.white70),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildInfoColumn(
+                        context, 'Joined', plan['dateJoined'].toString()),
+                    _buildInfoColumn(context, 'Available',
+                        'R${plan['amountAvailable'].toStringAsFixed(2)}'),
+                    _buildInfoColumn(context, 'Used',
+                        'R${plan['amountUsed'].toStringAsFixed(2)}'),
+                  ],
+                ),
+              ],
+            ),
         ],
       ),
+    );
+  }
+
+  Widget _buildInfoColumn(BuildContext context, String title, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall!
+              .copyWith(color: Colors.white70),
+        ),
+        Text(
+          value,
+          style: Theme.of(context)
+              .textTheme
+              .bodyLarge!
+              .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ],
     );
   }
 
@@ -112,7 +156,8 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionCard(BuildContext context, {required IconData icon, required String label, required VoidCallback onTap}) {
+  Widget _buildActionCard(BuildContext context,
+      {required IconData icon, required String label, required VoidCallback onTap}) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12.0),
@@ -216,7 +261,6 @@ class HomeScreen extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       builder: (_) {
-        // Provide the existing ClaimsBloc to the form
         return BlocProvider.value(
           value: context.read<ClaimsBloc>(),
           child: Padding(
