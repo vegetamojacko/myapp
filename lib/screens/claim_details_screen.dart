@@ -20,7 +20,6 @@ class _ClaimDetailsScreenState extends State<ClaimDetailsScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _vehicleRegController;
   late DateTime _selectedDate;
-  late TimeOfDay _selectedTime;
   late String _selectedWash;
 
   @override
@@ -28,7 +27,6 @@ class _ClaimDetailsScreenState extends State<ClaimDetailsScreen> {
     super.initState();
     _vehicleRegController = TextEditingController(text: widget.claim.vehicleReg);
     _selectedDate = widget.claim.washDate ?? DateTime.now();
-    _selectedTime = widget.claim.arrivalTime ?? TimeOfDay.now();
     _selectedWash = widget.claim.washType ?? 'Express Wash';
   }
 
@@ -43,7 +41,6 @@ class _ClaimDetailsScreenState extends State<ClaimDetailsScreen> {
       final updatedClaim = widget.claim.copyWith(
         vehicleReg: _vehicleRegController.text,
         washDate: _selectedDate,
-        arrivalTime: _selectedTime,
         washType: _selectedWash,
         totalAmount: _getWashPrice(_selectedWash),
         status: 'Pending',
@@ -114,28 +111,6 @@ class _ClaimDetailsScreenState extends State<ClaimDetailsScreen> {
                         }
                       },
                       child: const Text('Select Date'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text('Time of Arrival: ${_selectedTime.format(context)}'),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        final newTime = await showTimePicker(
-                          context: context,
-                          initialTime: _selectedTime,
-                        );
-                        if (newTime != null) {
-                          setState(() {
-                            _selectedTime = newTime;
-                          });
-                        }
-                      },
-                      child: const Text('Select Time'),
                     ),
                   ],
                 ),

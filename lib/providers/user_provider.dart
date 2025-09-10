@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class UserProvider with ChangeNotifier {
@@ -17,6 +16,15 @@ class UserProvider with ChangeNotifier {
   void updateUser({required String name, required String email}) {
     _name = name;
     _email = email;
+    notifyListeners();
+  }
+
+  void updateSubscription(String name, String price) {
+    _selectedPlan = {
+      'name': name,
+      'price': price,
+      'benefits': null, // Benefits are not specified in the new plans
+    };
     notifyListeners();
   }
 

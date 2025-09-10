@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +6,7 @@ import '../blocs/claims/claims_bloc.dart';
 import '../blocs/claims/claims_event.dart';
 import '../models/claim.dart';
 import 'car_wash_claim_form.dart';
+import 'event_claim_form.dart';
 
 class ClaimItem extends StatelessWidget {
   final Claim claim;
@@ -16,8 +16,13 @@ class ClaimItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(locale: 'en_ZA', symbol: 'R');
-    final submittedDate =
-        DateFormat.yMMMd().format(DateTime.parse(claim.submittedDate));
+    String submittedDate;
+    try {
+      submittedDate =
+          DateFormat.yMMMd().format(DateTime.parse(claim.submittedDate));
+    } catch (e) {
+      submittedDate = 'Invalid Date';
+    }
 
     return Container(
       padding: const EdgeInsets.all(16.0),
@@ -152,7 +157,9 @@ class ClaimItem extends StatelessWidget {
       builder: (_) {
         return BlocProvider.value(
           value: context.read<ClaimsBloc>(),
-          child: CarWashClaimForm(claim: claim),
+          child: claim.isCarWashClaim
+              ? CarWashClaimForm(claim: claim)
+              : EventClaimForm(claim: claim),
         );
       },
     );

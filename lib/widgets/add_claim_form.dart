@@ -6,7 +6,6 @@ import 'package:uuid/uuid.dart';
 import '../blocs/claims/claims_bloc.dart';
 import '../blocs/claims/claims_event.dart';
 import '../models/claim.dart';
-import '../providers/navigation_provider.dart';
 
 class AddClaimForm extends StatefulWidget {
   const AddClaimForm({super.key});

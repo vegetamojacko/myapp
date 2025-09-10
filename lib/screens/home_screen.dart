@@ -9,6 +9,7 @@ import '../blocs/claims/claims_state.dart';
 import '../models/claim.dart';
 import '../providers/navigation_provider.dart';
 import '../widgets/car_wash_claim_form.dart';
+import '../widgets/event_claim_form.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -89,8 +90,8 @@ class HomeScreen extends StatelessWidget {
           children: [
             _buildActionCard(
               context,
-              icon: Icons.add_circle_outline,
-              label: 'New Claim',
+              icon: Icons.event,
+              label: 'Claim Event',
               onTap: () => _showAddClaimSheet(context),
             ),
             _buildActionCard(
@@ -198,7 +199,16 @@ class HomeScreen extends StatelessWidget {
   }
 
   void _showAddClaimSheet(BuildContext context) {
-    // Implementation for adding a general claim
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) {
+        return BlocProvider.value(
+          value: context.read<ClaimsBloc>(),
+          child: const EventClaimForm(),
+        );
+      },
+    );
   }
 
   void _showCarWashClaimSheet(BuildContext context, {required Claim? claim}) {
