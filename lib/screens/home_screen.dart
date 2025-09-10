@@ -1,13 +1,14 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 import '../blocs/claims/claims_bloc.dart';
 import '../blocs/claims/claims_state.dart';
-import '../providers/user_provider.dart';
-import '../widgets/add_claim_form.dart';
-import '../widgets/claim_item.dart';
-import 'car_wash_screen.dart';
+import '../models/claim.dart';
+import '../providers/navigation_provider.dart';
+import '../widgets/car_wash_claim_form.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -15,48 +16,94 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFf3f4f6),
-      body: SafeArea(
-        child: SingleChildScrollView(
+      appBar: AppBar(
+        title: const Text('Dashboard'),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              bool isWideScreen = constraints.maxWidth > 960;
-              if (isWideScreen) {
-                return _buildWideScreenLayout(context);
-              } else {
-                return _buildNarrowScreenLayout(context);
-              }
-            },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildWelcomeBanner(context),
+              const SizedBox(height: 24),
+              _buildQuickActions(context),
+              const SizedBox(height: 24),
+              _buildRecentActivity(context),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildWideScreenLayout(BuildContext context) {
+  Widget _buildWelcomeBanner(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24.0),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.primary.withOpacity(0.7),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Welcome Back!',
+            style: Theme.of(context)
+                .textTheme
+                .headlineSmall!
+                .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Here\'s a quick overview of your claims and benefits.',
+            style: Theme.of(context)
+                .textTheme
+                .bodyLarge!
+                .copyWith(color: Colors.white70),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActions(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildHeader(),
-        const SizedBox(height: 24.0),
+        Text(
+          'Quick Actions',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: 16),
         Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Expanded(
-              flex: 1,
-              child: Column(
-                children: [
-                  _buildUserProfileCard(),
-                  const SizedBox(height: 32.0),
-                  _buildPlanCard(context),
-                ],
-              ),
+            _buildActionCard(
+              context,
+              icon: Icons.add_circle_outline,
+              label: 'New Claim',
+              onTap: () => _showAddClaimSheet(context),
             ),
-            const SizedBox(width: 32.0),
-            Expanded(
-              flex: 2,
-              child: _buildClaimsSection(context),
+            _buildActionCard(
+              context,
+              icon: Icons.directions_car,
+              label: 'Claim Car Wash',
+              onTap: () => _showCarWashClaimSheet(context, claim: null),
+            ),
+            _buildActionCard(
+              context,
+              icon: Icons.history,
+              label: 'View History',
+              onTap: () => context.read<NavigationProvider>().navigateToPage(1),
             ),
           ],
         ),
@@ -64,293 +111,114 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNarrowScreenLayout(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildHeader(),
-        const SizedBox(height: 24.0),
-        _buildUserProfileCard(),
-        const SizedBox(height: 32.0),
-        _buildPlanCard(context),
-        const SizedBox(height: 32.0),
-        _buildClaimsSection(context),
-      ],
-    );
-  }
-
-  Widget _buildHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Welcome Back!',
-          style: TextStyle(
-            fontSize: 32.0,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey[800],
-          ),
+  Widget _buildActionCard(BuildContext context, {required IconData icon, required String label, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12.0),
+      child: Container(
+        width: 100,
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceVariant,
+          borderRadius: BorderRadius.circular(12.0),
         ),
-        const SizedBox(height: 4.0),
-        Text(
-          "Here's your personal dashboard.",
-          style: TextStyle(
-            fontSize: 16.0,
-            color: Colors.grey[500],
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 32, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+          ],
         ),
-      ],
-    );
-  }
-
-  Widget _buildUserProfileCard() {
-    return DashboardCard(
-      child: Column(
-        children: [
-          Row(
-            children: [
-              const CircleAvatar(
-                radius: 32,
-                backgroundColor: Color(0xFF6366f1),
-                child: Text('U', style: TextStyle(fontSize: 32, color: Colors.white)),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Alex Doe',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600, // Corrected: semibold
-                        color: Colors.grey[900],
-                      ),
-                    ),
-                    Text(
-                      'alex.doe@example.com',
-                      style: TextStyle(color: Colors.grey[500]),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          const Divider(height: 1),
-          const SizedBox(height: 16),
-          _buildInfoRow('Member Since:', 'Jan 15, 2024'),
-          const SizedBox(height: 8),
-          _buildInfoRow('Location:', 'Midrand, South Africa'),
-        ],
       ),
     );
   }
 
-  Widget _buildInfoRow(String title, String value) {
-    return Row(
+  Widget _buildRecentActivity(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF4b5563))),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(value, style: const TextStyle(color: Color(0xFF4b5563))),
+        Text(
+          'Recent Claims',
+          style: Theme.of(context).textTheme.titleLarge,
         ),
-      ],
-    );
-  }
+        const SizedBox(height: 16),
+        BlocBuilder<ClaimsBloc, ClaimsState>(
+          builder: (context, state) {
+            if (state is ClaimsLoaded) {
+              // Filter for claims that are still pending.
+              final pendingClaims = state.claims
+                  .where((claim) => claim.status == 'Pending')
+                  .toList();
 
-  Widget _buildPlanCard(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
-    final plan = userProvider.selectedPlan;
-
-    return DashboardCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Your Plan',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.grey[900]), // Corrected: semibold
-          ),
-          const SizedBox(height: 4),
-          const Divider(),
-          const SizedBox(height: 12),
-          if (plan != null)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        plan['name'] ?? 'No Plan Selected',
-                        style: const TextStyle(
-                          color: Color(0xFF4f46e5),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                    Chip(
-                      label: const Text('Active'),
-                      backgroundColor: const Color(0xFFe0e7ff),
-                      labelStyle: const TextStyle(
-                        color: Color(0xFF3730a3),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500, // Corrected: medium
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  plan['price'] ?? '',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  (plan['benefits'] ?? '').split(', ').take(2).join('\n'),
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14, height: 1.5),
-                ),
-              ],
-            )
-          else
-            const Text(
-              'No subscription plan selected.',
-              style: TextStyle(color: Colors.grey, fontSize: 14),
-            ),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: TextButton(
-              onPressed: () {},
-              child: const Text('Manage Plan', style: TextStyle(fontWeight: FontWeight.w500, color: Color(0xFF4f46e5))), // Corrected: medium
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildClaimsSection(BuildContext context) {
-    return DashboardCard(
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'My Claims',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.grey[900]), // Corrected: semibold
-              ),
-              Flexible(
-                child: Wrap(
-                  spacing: 8.0,
-                  runSpacing: 8.0,
-                  alignment: WrapAlignment.end,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () => _showAddClaimSheet(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF4f46e5),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      ),
-                      child: const Text('Make a Claim', style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                    ElevatedButton(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const CarWashScreen()),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF10b981),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      ),
-                      child: const Text('Claim Car Wash', style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          const Divider(),
-          const SizedBox(height: 16),
-          BlocBuilder<ClaimsBloc, ClaimsState>(
-            builder: (context, state) {
-              if (state is ClaimsLoaded) {
-                if (state.claims.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 48.0),
-                    child: Center(
-                      child: Text(
-                        'You have no pending claims.\nClick "Make a Claim" to start.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                  );
-                }
+              if (pendingClaims.isNotEmpty) {
+                // Take the first 3 pending claims to display.
+                final recentClaims = pendingClaims.take(3).toList();
                 return ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: state.claims.length,
+                  itemCount: recentClaims.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
-                    final claim = state.claims[index];
-                    return ClaimItem(claim: claim);
+                    final claim = recentClaims[index];
+                    return _buildRecentClaimItem(context, claim);
                   },
-                  separatorBuilder: (context, index) => const SizedBox(height: 16),
                 );
               }
-              return const Center(child: CircularProgressIndicator());
-            },
-          ),
-        ],
+            }
+            // If there are no pending claims, show the default message.
+            return const Center(child: Text('No recent claims.'));
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecentClaimItem(BuildContext context, Claim claim) {
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        child: Icon(
+          claim.isCarWashClaim ? Icons.wash : Icons.event,
+          color: Colors.white,
+        ),
       ),
+      title: Text(claim.isCarWashClaim ? 'Car Wash Claim' : claim.eventName!),
+      subtitle: Text('Status: ${claim.status}'),
+      trailing: Text(
+        'R${claim.totalAmount.toStringAsFixed(2)}',
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      onTap: () => context.read<NavigationProvider>().navigateToPage(1),
     );
   }
 
   void _showAddClaimSheet(BuildContext context) {
+    // Implementation for adding a general claim
+  }
+
+  void _showCarWashClaimSheet(BuildContext context, {required Claim? claim}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (_) {
+        // Provide the existing ClaimsBloc to the form
         return BlocProvider.value(
           value: context.read<ClaimsBloc>(),
-          child: const AddClaimForm(),
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: SingleChildScrollView(
+              child: CarWashClaimForm(claim: claim),
+            ),
+          ),
         );
       },
-    );
-  }
-}
-
-class DashboardCard extends StatelessWidget {
-  final Widget child;
-  const DashboardCard({super.key, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(13), // Corrected: withOpacity deprecated
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: child,
     );
   }
 }

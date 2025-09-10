@@ -1,87 +1,92 @@
-
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 
 class Claim extends Equatable {
-  final String eventName;
-  final DateTime? eventDate;
-  final double? ticketCost;
-  final int? numTickets;
+  final String id;
   final double totalAmount;
   final String submittedDate;
   final String status; // 'Pending', 'Approved', 'Cancelled'
+
+  // Event specific fields
+  final String? eventName;
+  final DateTime? eventDate;
+  final double? ticketCost;
+  final int? numTickets;
 
   // Car Wash specific fields
   final String? washType;
   final String? vehicleReg;
   final DateTime? washDate;
-  final TimeOfDay? arrivalTime;
+
+  final bool isCarWashClaim;
 
   const Claim({
-    required this.eventName,
+    required this.id,
     required this.totalAmount,
     required this.submittedDate,
     required this.status,
+    this.eventName,
     this.eventDate,
     this.ticketCost,
     this.numTickets,
     this.washType,
     this.vehicleReg,
     this.washDate,
-    this.arrivalTime,
+    this.isCarWashClaim = false,
   });
 
   @override
   List<Object?> get props => [
+        id,
+        totalAmount,
+        submittedDate,
+        status,
         eventName,
         eventDate,
         ticketCost,
         numTickets,
-        totalAmount,
-        submittedDate,
-        status,
         washType,
         vehicleReg,
         washDate,
-        arrivalTime,
+        isCarWashClaim,
       ];
 
-  bool get isCarWashClaim => washType != null;
-
   Claim copyWith({
+    String? id,
+    double? totalAmount,
+    String? submittedDate,
+    String? status,
     String? eventName,
     DateTime? eventDate,
     double? ticketCost,
     int? numTickets,
-    double? totalAmount,
-    String? submittedDate,
-    String? status,
     String? washType,
     String? vehicleReg,
     DateTime? washDate,
-    TimeOfDay? arrivalTime,
+    bool? isCarWashClaim,
   }) {
     return Claim(
+      id: id ?? this.id,
+      totalAmount: totalAmount ?? this.totalAmount,
+      submittedDate: submittedDate ?? this.submittedDate,
+      status: status ?? this.status,
       eventName: eventName ?? this.eventName,
       eventDate: eventDate ?? this.eventDate,
       ticketCost: ticketCost ?? this.ticketCost,
       numTickets: numTickets ?? this.numTickets,
-      totalAmount: totalAmount ?? this.totalAmount,
-      submittedDate: submittedDate ?? this.submittedDate,
-      status: status ?? this.status,
       washType: washType ?? this.washType,
       vehicleReg: vehicleReg ?? this.vehicleReg,
       washDate: washDate ?? this.washDate,
-      arrivalTime: arrivalTime ?? this.arrivalTime,
+      isCarWashClaim: isCarWashClaim ?? this.isCarWashClaim,
     );
   }
 
   factory Claim.fromJson(Map<String, dynamic> json) {
     return Claim(
-      eventName: json['eventName'] as String,
+      id: json['id'] as String,
       totalAmount: (json['totalAmount'] as num).toDouble(),
       submittedDate: json['submittedDate'] as String,
       status: json['status'] as String? ?? 'Pending',
+      eventName: json['eventName'] as String?,
       eventDate: json['eventDate'] != null
           ? DateTime.parse(json['eventDate'] as String)
           : null,
@@ -92,28 +97,24 @@ class Claim extends Equatable {
       washDate: json['washDate'] != null
           ? DateTime.parse(json['washDate'] as String)
           : null,
-      arrivalTime: json['arrivalTime'] != null
-          ? TimeOfDay(
-              hour: int.parse((json['arrivalTime'] as String).split(':')[0]),
-              minute: int.parse((json['arrivalTime'] as String).split(':')[1]),
-            )
-          : null,
+      isCarWashClaim: json['isCarWashClaim'] as bool? ?? false,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'eventName': eventName,
+      'id': id,
       'totalAmount': totalAmount,
       'submittedDate': submittedDate,
       'status': status,
+      'eventName': eventName,
       'eventDate': eventDate?.toIso8601String(),
       'ticketCost': ticketCost,
       'numTickets': numTickets,
       'washType': washType,
       'vehicleReg': vehicleReg,
       'washDate': washDate?.toIso8601String(),
-      'arrivalTime': arrivalTime != null ? '${arrivalTime!.hour}:${arrivalTime!.minute}' : null,
+      'isCarWashClaim': isCarWashClaim,
     };
   }
 }

@@ -4,12 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 import '../blocs/claims/claims_bloc.dart';
-import '../blocs/claims/claims_event.dart';
 import '../blocs/claims/claims_state.dart';
 import '../models/claim.dart';
 import '../widgets/add_claim_form.dart';
 import '../widgets/claim_item.dart';
-import 'claim_details_screen.dart';
 
 class ClaimsScreen extends StatelessWidget {
   const ClaimsScreen({super.key});
@@ -100,23 +98,6 @@ class ClaimsScreen extends StatelessWidget {
                   ),
                   child: ClaimItem(
                     claim: claim,
-                    onCancel: isHistory
-                        ? null
-                        : () {
-                            context
-                                .read<ClaimsBloc>()
-                                .add(UpdateClaim(claim.copyWith(status: 'Cancelled')));
-                          },
-                    onEdit: isHistory || !claim.isCarWashClaim
-                        ? null
-                        : () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ClaimDetailsScreen(claim: claim),
-                              ),
-                            );
-                          },
                   ),
                 ),
               ),
@@ -140,4 +121,3 @@ class ClaimsScreen extends StatelessWidget {
     );
   }
 }
-

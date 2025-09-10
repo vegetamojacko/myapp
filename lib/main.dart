@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import './blocs/claims/claims_bloc.dart';
 import './blocs/claims/claims_event.dart';
+import './providers/navigation_provider.dart';
 import './providers/theme_provider.dart';
 import './providers/user_provider.dart';
 import './screens/claims_screen.dart';
@@ -91,6 +91,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => NavigationProvider()),
         BlocProvider(
           create: (_) =>
               ClaimsBloc(storageService: StorageService())..add(LoadClaims()),
@@ -129,6 +130,14 @@ class _MainScreenState extends State<MainScreen> {
     SubscriptionScreen(),
     ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<NavigationProvider>().setPageController(_pageController);
+    });
+  }
 
   void _onItemTapped(int index) {
     setState(() {

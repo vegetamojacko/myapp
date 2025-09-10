@@ -22,7 +22,7 @@ class SubscriptionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: color.withAlpha(26), // Corrected: withOpacity deprecated
+      color: color.withAlpha(26), 
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15.0),
         side: BorderSide(color: color, width: 2),
@@ -70,16 +70,38 @@ class SubscriptionCard extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                final plan = {
-                  'name': title,
-                  'price': price,
-                  'benefits': features.join(', '),
-                };
-                Provider.of<UserProvider>(context, listen: false)
-                    .updateSelectedPlan(plan);
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Confirm Subscription'),
+                      content: Text('Do you want to subscribe to the $title plan?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            final plan = {
+                              'name': title,
+                              'price': price,
+                              'benefits': features.join(', '),
+                            };
+                            Provider.of<UserProvider>(context, listen: false)
+                                .updateSelectedPlan(plan);
 
-                // Pop the current screen and navigate to the HomeScreen
-                navigatorKey.currentState?.popUntil((route) => route.isFirst);
+                            Navigator.of(context).pop();
+                            navigatorKey.currentState?.popUntil((route) => route.isFirst);
+                          },
+                          child: const Text('Confirm'),
+                        ),
+                      ],
+                    );
+                  },
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: color,

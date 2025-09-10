@@ -1,14 +1,17 @@
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
+import '../blocs/claims/claims_bloc.dart';
+import '../blocs/claims/claims_event.dart';
 import '../models/claim.dart';
+import 'car_wash_claim_form.dart';
 
 class ClaimItem extends StatelessWidget {
   final Claim claim;
-  final VoidCallback? onEdit;
-  final VoidCallback? onCancel;
 
-  const ClaimItem({super.key, required this.claim, this.onEdit, this.onCancel});
+  const ClaimItem({super.key, required this.claim});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +33,7 @@ class ClaimItem extends StatelessWidget {
             children: [
               Flexible(
                 child: Text(
-                  claim.eventName,
+                  claim.isCarWashClaim ? 'Car Wash Claim' : claim.eventName!,
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -48,13 +51,17 @@ class ClaimItem extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildStatusChip(),
-              if (onEdit != null || onCancel != null)
+              if (claim.status == 'Pending')
                 Row(
                   children: [
-                    if (onEdit != null)
-                      TextButton(onPressed: onEdit, child: const Text('Edit')),
-                    if (onCancel != null)
-                      TextButton(onPressed: onCancel, child: const Text('Cancel')),
+                    TextButton(
+                        onPressed: () => _showEditSheet(context, claim),
+                        child: const Text('Edit')),
+                    TextButton(
+                        onPressed: () => context
+                            .read<ClaimsBloc>()
+                            .add(UpdateClaim(claim.copyWith(status: 'Cancelled'))),
+                        child: const Text('Cancel')),
                   ],
                 ),
             ],
@@ -69,12 +76,11 @@ class ClaimItem extends StatelessWidget {
       final washDate = claim.washDate != null
           ? DateFormat.yMMMd().format(claim.washDate!)
           : 'N/A';
-      final arrivalTime = claim.arrivalTime?.format(context) ?? 'N/A';
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Wash on $washDate at $arrivalTime • Submitted on $submittedDate',
+            'Wash on $washDate • Submitted on $submittedDate',
             style: TextStyle(color: Colors.grey[600], fontSize: 12),
           ),
           const SizedBox(height: 4),
@@ -136,6 +142,19 @@ class ClaimItem extends StatelessWidget {
       ),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    );
+  }
+
+  void _showEditSheet(BuildContext context, Claim claim) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) {
+        return BlocProvider.value(
+          value: context.read<ClaimsBloc>(),
+          child: CarWashClaimForm(claim: claim),
+        );
+      },
     );
   }
 }
