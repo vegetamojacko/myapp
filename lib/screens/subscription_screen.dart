@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/user_provider.dart';
+import '../widgets/banking_details_modal.dart';
 
 class SubscriptionScreen extends StatelessWidget {
   const SubscriptionScreen({super.key});
@@ -10,13 +11,7 @@ class SubscriptionScreen extends StatelessWidget {
   void _selectPlan(BuildContext context, String planName, String planPrice) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     userProvider.updateSubscription(planName, planPrice);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$planName selected!'),
-        backgroundColor: Colors.green,
-      ),
-    );
-    context.go('/banking-details');
+    showBankingDetailsModal(context, planName, planPrice);
   }
 
   @override

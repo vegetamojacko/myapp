@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -116,54 +115,33 @@ class _ClaimDetailsScreenState extends State<ClaimDetailsScreen> {
                 ),
                 const SizedBox(height: 16),
                 const Text('Wash Options'),
-                ListTile(
+                RadioListTile<String>(
                   title: const Text('Express Wash (R50)'),
-                  leading: Radio<String>(
-                    value: 'Express Wash',
-                    groupValue: _selectedWash,
-                    onChanged: (String? value) {
-                      setState(() {
-                        _selectedWash = value!;
-                      });
-                    },
-                  ),
-                  onTap: () {
+                  value: 'Express Wash',
+                  groupValue: _selectedWash,
+                  onChanged: (String? value) {
                     setState(() {
-                      _selectedWash = 'Express Wash';
+                      _selectedWash = value!;
                     });
                   },
                 ),
-                 ListTile(
+                RadioListTile<String>(
                   title: const Text('Standard Wash (R80)'),
-                  leading: Radio<String>(
-                    value: 'Standard Wash',
-                    groupValue: _selectedWash,
-                    onChanged: (String? value) {
-                      setState(() {
-                        _selectedWash = value!;
-                      });
-                    },
-                  ),
-                  onTap: () {
+                  value: 'Standard Wash',
+                  groupValue: _selectedWash,
+                  onChanged: (String? value) {
                     setState(() {
-                      _selectedWash = 'Standard Wash';
+                      _selectedWash = value!;
                     });
                   },
                 ),
-                 ListTile(
+                RadioListTile<String>(
                   title: const Text('Premium Wash (R120)'),
-                  leading: Radio<String>(
-                    value: 'Premium Wash',
-                    groupValue: _selectedWash,
-                    onChanged: (String? value) {
-                      setState(() {
-                        _selectedWash = value!;
-                      });
-                    },
-                  ),
-                  onTap: () {
+                  value: 'Premium Wash',
+                  groupValue: _selectedWash,
+                  onChanged: (String? value) {
                     setState(() {
-                      _selectedWash = 'Premium Wash';
+                      _selectedWash = value!;
                     });
                   },
                 ),
