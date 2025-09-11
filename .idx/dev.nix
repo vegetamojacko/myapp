@@ -1,47 +1,55 @@
 { pkgs, ... }:
 
 let
-  # Override the default Android SDK to include necessary components
-  android-sdk = (pkgs.android-sdk.override {
+  # Override the default Android SDK to include necessary components.
+  # This makes the SDK available with platform-tools, build-tools, etc.
+  android_sdk_package = (pkgs.flutter.build-environment.android-sdk.override {
     cmdline-tools = true;
-    platforms = ["android-33"];
-    build-tools = ["33.0.2"];
     platform-tools = true;
+    build-tools = true;
   });
 in
 {
-  # Specify the packages needed for the environment
+  # Specify the packages needed for the environment.
+  # Note: pkgs.dart is not needed as it's included with pkgs.flutter.
   packages = [
-    pkgs.flutter
-    pkgs.dart
-    android-sdk # Add the configured Android SDK
+    pkgs.flutter,
+    android_sdk_package # Add the configured Android SDK
   ];
 
-  # Let Nix manage the IDE extensions
+  # Let Nix manage the IDE extensions.
   idx.extensions = [
-    "dart-code.flutter"
+    "dart-code.flutter",
     "dart-code.dart-code"
   ];
 
-  # Set environment variables
+  # Set environment variables.
   env = {
-    # Set the path to the Android SDK
-    ANDROID_HOME = "${android-sdk}/share/android-sdk";
+    # CORRECTED: The path should point to the root of the package.
+    ANDROID_HOME = "${android_sdk_package}";
   };
 
-  # Start a web server on port 8080 and run the Flutter app
+  # Configure previews for the workspace.
   idx.previews = {
     enable = true;
-    previews = [{
-      id = "web";
-      command = "flutter run -d web-server --web-port $PORT --web-hostname 0.0.0.0";
-      manager = "web";
-    }];
+    previews = [
+      # This web preview is correct.
+      {
+        id = "web";
+        command = "flutter run -d web-server --web-port $PORT --web-hostname 0.0.0.0";
+        manager = "web";
+      }
+      # REMOVED: The Android preview block was incorrect.
+      # To run on Android, open the emulator from the side panel and
+      # run `flutter run` from the terminal.
+    ];
   };
 
   # Any commands that should be run when the workspace starts.
   idx.workspace.onStart = {
-     # Accept Android licenses automatically
-     "yes | ${android-sdk}/bin/sdkmanager --licenses" = {};
+    # This command correctly accepts Android licenses automatically.
+    "yes | ${android_sdk_package}/bin/sdkmanager --licenses" = {};
+    # Optional: You can also run flutter doctor to check your setup on start.
+    # "flutter doctor" = {};
   };
 }
