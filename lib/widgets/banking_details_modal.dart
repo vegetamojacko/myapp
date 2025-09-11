@@ -12,8 +12,11 @@ void showBankingDetailsModal(
     builder: (context) => DraggableScrollableSheet(
       expand: false,
       initialChildSize: 0.8,
-      builder: (context, scrollController) =>
-          BankingDetailsForm(planName: planName, planPrice: planPrice),
+      builder: (context, scrollController) => BankingDetailsForm(
+        planName: planName,
+        planPrice: planPrice,
+        scrollController: scrollController,
+      ),
     ),
   );
 }
@@ -21,9 +24,14 @@ void showBankingDetailsModal(
 class BankingDetailsForm extends StatefulWidget {
   final String planName;
   final String planPrice;
+  final ScrollController scrollController;
 
-  const BankingDetailsForm(
-      {super.key, required this.planName, required this.planPrice});
+  const BankingDetailsForm({
+    super.key,
+    required this.planName,
+    required this.planPrice,
+    required this.scrollController,
+  });
 
   @override
   State<BankingDetailsForm> createState() => _BankingDetailsFormState();
@@ -70,9 +78,8 @@ class _BankingDetailsFormState extends State<BankingDetailsForm> {
       padding: const EdgeInsets.all(24.0),
       child: Form(
         key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: ListView(
+          controller: widget.scrollController,
           children: [
             Text(
               'Enter Banking Details',

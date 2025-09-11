@@ -90,14 +90,19 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildInfoColumn(
-                          context, 'Joined', plan['dateJoined'].toString()),
-                      _buildInfoColumn(context, 'Available',
-                          'R${plan['amountAvailable'].toStringAsFixed(2)}'),
-                      _buildInfoColumn(context, 'Used',
-                          'R${plan['amountUsed'].toStringAsFixed(2)}'),
+                      Expanded(
+                        child: _buildInfoColumn(
+                            context, 'Joined', plan['dateJoined'].toString()),
+                      ),
+                      Expanded(
+                        child: _buildInfoColumn(context, 'Available',
+                            'R${plan['amountAvailable'].toStringAsFixed(2)}'),
+                      ),
+                      Expanded(
+                        child: _buildInfoColumn(context, 'Used',
+                            'R${plan['amountUsed'].toStringAsFixed(2)}'),
+                      ),
                     ],
                   ),
                 ],
@@ -124,6 +129,7 @@ class HomeScreen extends StatelessWidget {
               .textTheme
               .bodyLarge!
               .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+          softWrap: true, // Ensure text wraps
         ),
       ],
     );

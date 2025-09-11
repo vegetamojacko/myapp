@@ -62,6 +62,12 @@ class _ClaimDetailsScreenState extends State<ClaimDetailsScreen> {
     }
   }
 
+  final List<Map<String, String>> _washOptions = [
+    {'value': 'Express Wash', 'title': 'Express Wash (R50)'},
+    {'value': 'Standard Wash', 'title': 'Standard Wash (R80)'},
+    {'value': 'Premium Wash', 'title': 'Premium Wash (R120)'},
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,35 +121,14 @@ class _ClaimDetailsScreenState extends State<ClaimDetailsScreen> {
                 ),
                 const SizedBox(height: 16),
                 const Text('Wash Options'),
-                RadioListTile<String>(
-                  title: const Text('Express Wash (R50)'),
-                  value: 'Express Wash',
-                  groupValue: _selectedWash,
+                _RadioGroup(
+                  selectedValue: _selectedWash,
                   onChanged: (String? value) {
                     setState(() {
                       _selectedWash = value!;
                     });
                   },
-                ),
-                RadioListTile<String>(
-                  title: const Text('Standard Wash (R80)'),
-                  value: 'Standard Wash',
-                  groupValue: _selectedWash,
-                  onChanged: (String? value) {
-                    setState(() {
-                      _selectedWash = value!;
-                    });
-                  },
-                ),
-                RadioListTile<String>(
-                  title: const Text('Premium Wash (R120)'),
-                  value: 'Premium Wash',
-                  groupValue: _selectedWash,
-                  onChanged: (String? value) {
-                    setState(() {
-                      _selectedWash = value!;
-                    });
-                  },
+                  options: _washOptions,
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
@@ -155,6 +140,50 @@ class _ClaimDetailsScreenState extends State<ClaimDetailsScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _RadioGroup extends StatefulWidget {
+  final String selectedValue;
+  final ValueChanged<String?> onChanged;
+  final List<Map<String, String>> options;
+
+  const _RadioGroup({
+    required this.selectedValue,
+    required this.onChanged,
+    required this.options,
+  });
+
+  @override
+  State<_RadioGroup> createState() => _RadioGroupState();
+}
+
+class _RadioGroupState extends State<_RadioGroup> {
+  late String _selectedValue;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedValue = widget.selectedValue;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: widget.options.map((option) {
+        return RadioListTile<String>(
+          title: Text(option['title']!),
+          value: option['value']!,
+          groupValue: _selectedValue,
+          onChanged: (String? value) {
+            setState(() {
+              _selectedValue = value!;
+            });
+            widget.onChanged(value);
+          },
+        );
+      }).toList(),
     );
   }
 }

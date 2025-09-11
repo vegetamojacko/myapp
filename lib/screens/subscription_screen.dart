@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../providers/banking_provider.dart';
 import '../providers/user_provider.dart';
 import '../widgets/banking_details_modal.dart';
 
@@ -10,12 +11,33 @@ class SubscriptionScreen extends StatelessWidget {
 
   void _selectPlan(BuildContext context, String planName, String planPrice) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    userProvider.updateSubscription(planName, planPrice);
-    showBankingDetailsModal(context, planName, planPrice);
+    final bankingProvider = Provider.of<BankingProvider>(context, listen: false);
+
+    if (bankingProvider.bankingInfo != null) {
+      userProvider.updateSubscription(planName, planPrice);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Successfully changed to $planName!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      userProvider.updateSubscription(planName, planPrice);
+      showBankingDetailsModal(context, planName, planPrice);
+    }
+  }
+
+  double _parsePrice(String priceString) {
+    final cleanPrice = priceString.replaceAll(RegExp(r'[^\d.]'), '');
+    return double.tryParse(cleanPrice) ?? 0.0;
   }
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final bankingProvider = Provider.of<BankingProvider>(context);
+    final currentPlan = userProvider.selectedPlan;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Subscription Plans'),
@@ -26,12 +48,13 @@ class SubscriptionScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildCarWashSubscription(context),
+            _buildCarWashSubscription(context, currentPlan,
+                bankingProvider.bankingInfo != null),
             const SizedBox(height: 24),
             _buildPricingPlan(
               context,
               title: 'Starter Vibes',
-              price: 'R249',
+              price: 'R249/month',
               description:
                   'Perfect for students or anyone looking to start small.',
               features: [
@@ -41,12 +64,14 @@ class SubscriptionScreen extends StatelessWidget {
               ],
               buttonColor: const Color(0xFF28A745),
               buttonTextColor: Colors.white,
+              currentPlan: currentPlan,
+              hasBankingDetails: bankingProvider.bankingInfo != null,
             ),
             const SizedBox(height: 24),
             _buildPricingPlan(
               context,
               title: 'Momentum Wave',
-              price: 'R349',
+              price: 'R349/month',
               description:
                   'For those who want a little more energy and variety.',
               features: [
@@ -56,12 +81,14 @@ class SubscriptionScreen extends StatelessWidget {
               ],
               buttonColor: const Color(0xFFFD7E14),
               buttonTextColor: Colors.white,
+              currentPlan: currentPlan,
+              hasBankingDetails: bankingProvider.bankingInfo != null,
             ),
             const SizedBox(height: 24),
             _buildPricingPlan(
               context,
               title: 'Elite Experience',
-              price: 'R549',
+              price: 'R549/month',
               description: 'Go all out with the full Candibean lifestyle.',
               features: [
                 'Premium access to top-tier events',
@@ -70,6 +97,8 @@ class SubscriptionScreen extends StatelessWidget {
               ],
               buttonColor: const Color(0xFF6F42C1),
               buttonTextColor: Colors.white,
+              currentPlan: currentPlan,
+              hasBankingDetails: bankingProvider.bankingInfo != null,
             ),
             const SizedBox(height: 32),
             TextButton(
@@ -85,7 +114,34 @@ class SubscriptionScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCarWashSubscription(BuildContext context) {
+  Widget _buildCarWashSubscription(
+      BuildContext context, Map<String, dynamic>? currentPlan, bool hasBankingDetails) {
+    const planName = 'Car Wash';
+    const planPrice = 'R100/month';
+    final isCurrentPlan = currentPlan != null && currentPlan['name'] == planName;
+    final planPriceNumber = _parsePrice(planPrice);
+    final currentPriceNumber =
+        currentPlan != null ? _parsePrice(currentPlan['price']) : 0.0;
+
+    String buttonText;
+    VoidCallback? onPressed;
+
+    if (hasBankingDetails) {
+      if (isCurrentPlan) {
+        buttonText = 'Current Plan';
+        onPressed = null;
+      } else if (planPriceNumber > currentPriceNumber) {
+        buttonText = 'Upgrade';
+        onPressed = () => _selectPlan(context, planName, planPrice);
+      } else {
+        buttonText = 'Downgrade';
+        onPressed = () => _selectPlan(context, planName, planPrice);
+      }
+    } else {
+      buttonText = 'Select Plan';
+      onPressed = () => _selectPlan(context, planName, planPrice);
+    }
+
     return Card(
       elevation: 4.0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
@@ -95,13 +151,13 @@ class SubscriptionScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'Car Wash',
+              planName,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16.0),
             const Text(
-              'R100/month',
+              planPrice,
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 36.0, fontWeight: FontWeight.bold, color: Colors.blue),
@@ -130,7 +186,7 @@ class SubscriptionScreen extends StatelessWidget {
                 color: Colors.blue),
             const SizedBox(height: 24.0),
             ElevatedButton(
-              onPressed: () => _selectPlan(context, 'Car Wash', 'R100/month'),
+              onPressed: onPressed,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
@@ -138,7 +194,7 @@ class SubscriptionScreen extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0)),
               ),
-              child: const Text('Select Plan', style: TextStyle(fontSize: 18.0)),
+              child: Text(buttonText, style: const TextStyle(fontSize: 18.0)),
             ),
           ],
         ),
@@ -154,7 +210,33 @@ class SubscriptionScreen extends StatelessWidget {
     required List<String> features,
     required Color buttonColor,
     required Color buttonTextColor,
+    required Map<String, dynamic>? currentPlan,
+    required bool hasBankingDetails,
   }) {
+    final isCurrentPlan = currentPlan != null && currentPlan['name'] == title;
+    final planPriceNumber = _parsePrice(price);
+    final currentPriceNumber =
+        currentPlan != null ? _parsePrice(currentPlan['price']) : 0.0;
+
+    String buttonText;
+    VoidCallback? onPressed;
+
+    if (hasBankingDetails) {
+      if (isCurrentPlan) {
+        buttonText = 'Current Plan';
+        onPressed = null;
+      } else if (planPriceNumber > currentPriceNumber) {
+        buttonText = 'Upgrade';
+        onPressed = () => _selectPlan(context, title, price);
+      } else {
+        buttonText = 'Downgrade';
+        onPressed = () => _selectPlan(context, title, price);
+      }
+    } else {
+      buttonText = 'Select Plan';
+      onPressed = () => _selectPlan(context, title, price);
+    }
+
     return Card(
       elevation: 4.0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
@@ -191,7 +273,7 @@ class SubscriptionScreen extends StatelessWidget {
                 .map((feature) => _buildFeatureRow(feature, color: buttonColor)),
             const SizedBox(height: 24.0),
             ElevatedButton(
-              onPressed: () => _selectPlan(context, title, price),
+              onPressed: onPressed,
               style: ElevatedButton.styleFrom(
                 backgroundColor: buttonColor,
                 foregroundColor: buttonTextColor,
@@ -199,7 +281,7 @@ class SubscriptionScreen extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0)),
               ),
-              child: const Text('Select Plan', style: TextStyle(fontSize: 18.0)),
+              child: Text(buttonText, style: const TextStyle(fontSize: 18.0)),
             ),
           ],
         ),
