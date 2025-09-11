@@ -24,16 +24,25 @@ class UserProvider with ChangeNotifier {
   }
 
   void updateSubscription(String name, String price) {
-    final amount = double.tryParse(price.replaceAll(r'R', '')) ?? 0.0;
+    final currentAmountAvailable = _selectedPlan?['amountAvailable'] as double? ?? 0.0;
+    final currentAmountUsed = _selectedPlan?['amountUsed'] as double? ?? 0.0;
+    
     _selectedPlan = {
       'name': name,
       'price': price,
+      'benefits': _getBenefitsForPlan(name),
       'dateJoined': DateFormat('yyyy-MM-dd').format(DateTime.now()),
-      'amountAvailable': amount,
-      'amountUsed': 0.0,
-      'benefits': null,
+      'amountAvailable': currentAmountAvailable,
+      'amountUsed': currentAmountUsed,
     };
     notifyListeners();
+  }
+
+  String _getBenefitsForPlan(String planName) {
+    if (planName == 'Car Wash') {
+      return 'Unlimited car washes and detailing';
+    }
+    return 'Event cancellations, Postponements, and more';
   }
 
   void updateSelectedPlan(Map<String, dynamic>? plan) {
