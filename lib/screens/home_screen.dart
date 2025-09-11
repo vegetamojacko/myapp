@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../blocs/claims/claims_bloc.dart';
 import '../blocs/claims/claims_state.dart';
 import '../models/claim.dart';
+import '../providers/banking_provider.dart';
 import '../providers/navigation_provider.dart';
 import '../providers/user_provider.dart';
 import '../widgets/car_wash_claim_form.dart';
@@ -40,6 +40,7 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildWelcomeBanner(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
+    final bankingProvider = Provider.of<BankingProvider>(context);
     final plan = userProvider.selectedPlan;
 
     return Container(
@@ -49,7 +50,7 @@ class HomeScreen extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             Theme.of(context).colorScheme.primary,
-            Theme.of(context).colorScheme.primary.withOpacity(0.7),
+            Theme.of(context).colorScheme.primary.withAlpha(200),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -68,30 +69,39 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           if (plan != null)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Current Plan: ${plan['name']}',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyLarge!
-                      .copyWith(color: Colors.white70),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildInfoColumn(
-                        context, 'Joined', plan['dateJoined'].toString()),
-                    _buildInfoColumn(context, 'Available',
-                        'R${plan['amountAvailable'].toStringAsFixed(2)}'),
-                    _buildInfoColumn(context, 'Used',
-                        'R${plan['amountUsed'].toStringAsFixed(2)}'),
-                  ],
-                ),
-              ],
-            ),
+            if (bankingProvider.bankingInfo == null)
+              Text(
+                'Joined: ${plan['dateJoined'].toString()}',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyLarge!
+                    .copyWith(color: Colors.white70),
+              )
+            else
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Current Plan: ${plan['name']}',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyLarge!
+                        .copyWith(color: Colors.white70),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildInfoColumn(
+                          context, 'Joined', plan['dateJoined'].toString()),
+                      _buildInfoColumn(context, 'Available',
+                          'R${plan['amountAvailable'].toStringAsFixed(2)}'),
+                      _buildInfoColumn(context, 'Used',
+                          'R${plan['amountUsed'].toStringAsFixed(2)}'),
+                    ],
+                  ),
+                ],
+              ),
         ],
       ),
     );
@@ -216,7 +226,7 @@ class HomeScreen extends StatelessWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: recentClaims.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  separatorBuilder: (context, index) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final claim = recentClaims[index];
                     return _buildRecentClaimItem(context, claim);

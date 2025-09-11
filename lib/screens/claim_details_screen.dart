@@ -116,33 +116,54 @@ class _ClaimDetailsScreenState extends State<ClaimDetailsScreen> {
                 ),
                 const SizedBox(height: 16),
                 const Text('Wash Options'),
-                RadioListTile<String>(
+                ListTile(
                   title: const Text('Express Wash (R50)'),
-                  value: 'Express Wash',
-                  groupValue: _selectedWash,
-                  onChanged: (value) {
+                  leading: Radio<String>(
+                    value: 'Express Wash',
+                    groupValue: _selectedWash,
+                    onChanged: (String? value) {
+                      setState(() {
+                        _selectedWash = value!;
+                      });
+                    },
+                  ),
+                  onTap: () {
                     setState(() {
-                      _selectedWash = value!;
+                      _selectedWash = 'Express Wash';
                     });
                   },
                 ),
-                RadioListTile<String>(
+                 ListTile(
                   title: const Text('Standard Wash (R80)'),
-                  value: 'Standard Wash',
-                  groupValue: _selectedWash,
-                  onChanged: (value) {
+                  leading: Radio<String>(
+                    value: 'Standard Wash',
+                    groupValue: _selectedWash,
+                    onChanged: (String? value) {
+                      setState(() {
+                        _selectedWash = value!;
+                      });
+                    },
+                  ),
+                  onTap: () {
                     setState(() {
-                      _selectedWash = value!;
+                      _selectedWash = 'Standard Wash';
                     });
                   },
                 ),
-                RadioListTile<String>(
+                 ListTile(
                   title: const Text('Premium Wash (R120)'),
-                  value: 'Premium Wash',
-                  groupValue: _selectedWash,
-                  onChanged: (value) {
+                  leading: Radio<String>(
+                    value: 'Premium Wash',
+                    groupValue: _selectedWash,
+                    onChanged: (String? value) {
+                      setState(() {
+                        _selectedWash = value!;
+                      });
+                    },
+                  ),
+                  onTap: () {
                     setState(() {
-                      _selectedWash = value!;
+                      _selectedWash = 'Premium Wash';
                     });
                   },
                 ),

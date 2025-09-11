@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/user_provider.dart';
@@ -15,6 +16,7 @@ class SubscriptionScreen extends StatelessWidget {
         backgroundColor: Colors.green,
       ),
     );
+    context.go('/banking-details');
   }
 
   @override
@@ -22,6 +24,7 @@ class SubscriptionScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Subscription Plans'),
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -73,6 +76,14 @@ class SubscriptionScreen extends StatelessWidget {
               buttonColor: const Color(0xFF6F42C1),
               buttonTextColor: Colors.white,
             ),
+            const SizedBox(height: 32),
+            TextButton(
+              onPressed: () {
+                context.go('/home');
+              },
+              child: const Text('Skip for now'),
+            ),
+            const SizedBox(height: 16),
           ],
         ),
       ),

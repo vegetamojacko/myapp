@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/user_provider.dart';
-import './custom_text_form_field.dart';
 
 class EditProfileDialog extends StatefulWidget {
   const EditProfileDialog({super.key});
@@ -13,33 +12,15 @@ class EditProfileDialog extends StatefulWidget {
 
 class _EditProfileDialogState extends State<EditProfileDialog> {
   final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _nameController;
-  late final TextEditingController _emailController;
+  late TextEditingController _nameController;
+  late TextEditingController _contactController;
 
   @override
   void initState() {
     super.initState();
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     _nameController = TextEditingController(text: userProvider.name);
-    _emailController = TextEditingController(text: userProvider.email);
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    super.dispose();
-  }
-
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      userProvider.updateUser(
-        name: _nameController.text,
-        email: _emailController.text,
-      );
-      Navigator.of(context).pop();
-    }
+    _contactController = TextEditingController(text: userProvider.contactNumber);
   }
 
   @override
@@ -51,25 +32,22 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CustomTextFormField(
+            TextFormField(
               controller: _nameController,
-              labelText: 'Name',
+              decoration: const InputDecoration(labelText: 'Name'),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter your name.';
+                  return 'Please enter your name';
                 }
                 return null;
               },
             ),
-            CustomTextFormField(
-              controller: _emailController,
-              labelText: 'Email',
+            TextFormField(
+              controller: _contactController,
+              decoration: const InputDecoration(labelText: 'Contact Number'),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter your email.';
-                }
-                if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                  return 'Please enter a valid email address.';
+                  return 'Please enter your contact number';
                 }
                 return null;
               },
@@ -79,11 +57,21 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
         ElevatedButton(
-          onPressed: _submitForm,
+          onPressed: () {
+            if (_formKey.currentState!.validate()) {
+              final userProvider = context.read<UserProvider>();
+              userProvider.updateUser(
+                name: _nameController.text,
+                email: userProvider.email, // Keep the existing email
+                contactNumber: _contactController.text,
+              );
+              Navigator.pop(context);
+            }
+          },
           child: const Text('Save'),
         ),
       ],

@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import './app_router.dart';
 import './blocs/claims/claims_bloc.dart';
 import './blocs/claims/claims_event.dart';
+import './providers/banking_provider.dart';
 import './providers/navigation_provider.dart';
 import './providers/theme_provider.dart';
 import './providers/user_provider.dart';
@@ -92,6 +94,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
+        ChangeNotifierProvider(create: (_) => BankingProvider()),
         BlocProvider(
           create: (_) =>
               ClaimsBloc(storageService: StorageService())..add(LoadClaims()),
@@ -99,13 +102,12 @@ class MyApp extends StatelessWidget {
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
-          return MaterialApp(
-            navigatorKey: navigatorKey,
+          return MaterialApp.router(
+            routerConfig: AppRouter.router,
             title: 'Claims App',
             theme: lightTheme,
             darkTheme: darkTheme,
             themeMode: themeProvider.themeMode,
-            home: const MainScreen(),
           );
         },
       ),
@@ -169,6 +171,7 @@ class _MainScreenState extends State<MainScreen> {
         children: _widgetOptions,
       ),
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
