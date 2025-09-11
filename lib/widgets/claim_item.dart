@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../blocs/claims/claims_bloc.dart';
 import '../blocs/claims/claims_event.dart';
 import '../models/claim.dart';
+import '../widgets/status_badge.dart';
 import 'car_wash_claim_form.dart';
 import 'event_claim_form.dart';
 
@@ -55,7 +56,7 @@ class ClaimItem extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatusChip(),
+              StatusBadge(status: claim.status),
               if (claim.status == 'Pending')
                 Row(
                   children: [
@@ -114,40 +115,6 @@ class ClaimItem extends StatelessWidget {
         ],
       );
     }
-  }
-
-  Widget _buildStatusChip() {
-    Color backgroundColor;
-    Color textColor;
-    String text = claim.status;
-
-    switch (claim.status) {
-      case 'Approved':
-        backgroundColor = const Color(0xFFdcfce7);
-        textColor = const Color(0xFF166534);
-        break;
-      case 'Cancelled':
-        backgroundColor = const Color(0xFFfee2e2);
-        textColor = const Color(0xFF991b1b);
-        break;
-      case 'Pending':
-      default:
-        backgroundColor = const Color(0xFFfef9c3);
-        textColor = const Color(0xFF713f12);
-        break;
-    }
-
-    return Chip(
-      label: Text(text),
-      backgroundColor: backgroundColor,
-      labelStyle: TextStyle(
-        color: textColor,
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-    );
   }
 
   void _showEditSheet(BuildContext context, Claim claim) {

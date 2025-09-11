@@ -28,19 +28,19 @@ class ClaimsScreen extends StatelessWidget {
         builder: (context, state) {
           if (state is ClaimsLoaded) {
             final pendingClaims = state.claims
-                .where((claim) => claim.status == 'Pending')
+                .where((claim) => claim.status.toLowerCase() == 'pending')
                 .toList();
             final completedClaims = state.claims
                 .where((claim) =>
-                    claim.status == 'Approved' || claim.status == 'Cancelled')
+                    claim.status.toLowerCase() == 'approved' || claim.status.toLowerCase() == 'cancelled' || claim.status.toLowerCase() == 'completed' || claim.status.toLowerCase() == 'failed')
                 .toList();
 
             return ListView(
               children: [
-                _buildSectionTitle('Pending Claims'),
+                _buildSectionTitle(context, 'Pending Claims'),
                 _buildClaimsList(context, pendingClaims),
                 const SizedBox(height: 20),
-                _buildSectionTitle('History (Last 3)'),
+                _buildSectionTitle(context, 'History (Last 3)'),
                 _buildClaimsList(context, completedClaims, isHistory: true),
               ],
             );
@@ -53,15 +53,12 @@ class ClaimsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Text(
         title,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
       ),
     );
   }
