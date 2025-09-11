@@ -1,47 +1,36 @@
-{ pkgs, ... }:
-
-let
-  # Override the default Android SDK to include necessary components
-  android-sdk = (pkgs.android-sdk.override {
-    cmdline-tools = true;
-    platforms = ["android-33"];
-    build-tools = ["33.0.2"];
-    platform-tools = true;
-  });
-in
-{
-  # Specify the packages needed for the environment
+# To learn more about how to use Nix to configure your environment
+# see: https://firebase.google.com/docs/studio/customize-workspace
+{ pkgs, ... }: {
+  # Which nixpkgs channel to use.
+  channel = "unstable"; # or "stable-24.05"
+  # Use https://search.nixos.org/packages to find packages
   packages = [
+    pkgs.jdk21
+    pkgs.unzip
     pkgs.flutter
-    pkgs.dart
-    android-sdk # Add the configured Android SDK
   ];
-
-  # Let Nix manage the IDE extensions
-  idx.extensions = [
-    "dart-code.flutter"
-    "dart-code.dart-code"
-  ];
-
-  # Set environment variables
-  env = {
-    # Set the path to the Android SDK
-    ANDROID_HOME = "${android-sdk}/share/android-sdk";
-  };
-
-  # Start a web server on port 8080 and run the Flutter app
-  idx.previews = {
-    enable = true;
-    previews = [{
-      id = "web";
-      command = "flutter run -d web-server --web-port $PORT --web-hostname 0.0.0.0";
-      manager = "web";
-    }];
-  };
-
-  # Any commands that should be run when the workspace starts.
-  idx.workspace.onStart = {
-     # Accept Android licenses automatically
-     "yes | ${android-sdk}/bin/sdkmanager --licenses" = {};
+  # Sets environment variables in the workspace
+  env = {};
+  idx = {
+    # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
+    extensions = [
+      "Dart-Code.flutter"
+      "Dart-Code.dart-code"
+    ];
+    workspace = {
+      # Runs when a workspace is first created with this `dev.nix` file
+      onCreate = { };
+      # To run something each time the workspace is (re)started, use the `onStart` hook
+    };
+    # Enable previews and customize configuration
+    previews = {
+      enable = true;
+      previews = {
+        web = {
+          command = ["flutter" "run" "--machine" "-d" "web-server" "--web-hostname" "0.0.0.0" "--web-port" "$PORT"];
+          manager = "flutter";
+        };
+      };
+    };
   };
 }

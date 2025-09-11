@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,7 +15,6 @@ import './screens/home_screen.dart';
 import './screens/profile_screen.dart';
 import './screens/subscription_screen.dart';
 import './services/storage_service.dart';
-import './utils/app_colors.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -29,27 +27,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const MaterialColor primarySeedColor = Colors.deepPurple;
+
     final TextTheme appTextTheme = TextTheme(
       displayLarge:
-          GoogleFonts.oswald(fontSize: 57, fontWeight: FontWeight.bold, color: AppColors.primaryText),
+          GoogleFonts.oswald(fontSize: 57, fontWeight: FontWeight.bold),
       titleLarge:
-          GoogleFonts.roboto(fontSize: 22, fontWeight: FontWeight.w500, color: AppColors.primaryText),
-      bodyMedium: GoogleFonts.openSans(fontSize: 14, color: AppColors.primaryText),
+          GoogleFonts.roboto(fontSize: 22, fontWeight: FontWeight.w500),
+      bodyMedium: GoogleFonts.openSans(fontSize: 14),
     );
 
     final ThemeData lightTheme = ThemeData(
       useMaterial3: true,
-      scaffoldBackgroundColor: AppColors.background,
-      colorScheme: const ColorScheme.light(
-        primary: AppColors.primaryActionStart,
-        secondary: AppColors.primaryActionEnd,
-        surface: AppColors.contentCard,
-        onSurface: AppColors.primaryText,
-        error: AppColors.failedText,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primarySeedColor,
+        brightness: Brightness.light,
       ),
       textTheme: appTextTheme,
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.darkGradientStart,
+        backgroundColor: primarySeedColor,
         foregroundColor: Colors.white,
         titleTextStyle:
             GoogleFonts.oswald(fontSize: 24, fontWeight: FontWeight.bold),
@@ -57,56 +53,38 @@ class MyApp extends StatelessWidget {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           foregroundColor: Colors.white,
-          backgroundColor: AppColors.primaryActionStart,
+          backgroundColor: primarySeedColor,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           textStyle:
               GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
-      ),
-      cardTheme: const CardThemeData(
-        color: AppColors.contentCard,
-        elevation: 1,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
       ),
     );
 
     final ThemeData darkTheme = ThemeData(
       useMaterial3: true,
-      scaffoldBackgroundColor: AppColors.darkGradientEnd,
-      colorScheme: const ColorScheme.dark(
-        primary: AppColors.primaryActionStart,
-        secondary: AppColors.primaryActionEnd,
-        surface: AppColors.darkGradientStart,
-        onSurface: Colors.white,
-        error: AppColors.failedBackground,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primarySeedColor,
+        brightness: Brightness.dark,
       ),
-      textTheme: appTextTheme.apply(bodyColor: Colors.white, displayColor: Colors.white),
+      textTheme: appTextTheme,
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.darkGradientStart,
+        backgroundColor: Colors.grey[900],
         foregroundColor: Colors.white,
         titleTextStyle:
             GoogleFonts.oswald(fontSize: 24, fontWeight: FontWeight.bold),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          foregroundColor: Colors.white,
-          backgroundColor: AppColors.primaryActionStart,
+          foregroundColor: Colors.black,
+          backgroundColor: primarySeedColor.shade200,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           textStyle:
               GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
-      ),
-       cardTheme: const CardThemeData(
-        color: AppColors.darkGradientStart,
-        elevation: 1,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
       ),
     );
@@ -118,7 +96,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(create: (_) => BankingProvider()),
         BlocProvider(
-          create: (_,) =>
+          create: (_) =>
               ClaimsBloc(storageService: StorageService())..add(LoadClaims()),
         ),
       ],

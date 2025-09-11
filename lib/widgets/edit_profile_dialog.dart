@@ -12,12 +12,14 @@ class EditProfileDialog extends StatefulWidget {
 
 class _EditProfileDialogState extends State<EditProfileDialog> {
   final _formKey = GlobalKey<FormState>();
+  late TextEditingController _nameController;
   late TextEditingController _contactController;
 
   @override
   void initState() {
     super.initState();
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    _nameController = TextEditingController(text: userProvider.name);
     _contactController = TextEditingController(text: userProvider.contactNumber);
   }
 
@@ -30,6 +32,16 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            TextFormField(
+              controller: _nameController,
+              decoration: const InputDecoration(labelText: 'Name'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your name';
+                }
+                return null;
+              },
+            ),
             TextFormField(
               controller: _contactController,
               decoration: const InputDecoration(labelText: 'Contact Number'),
@@ -53,8 +65,8 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
             if (_formKey.currentState!.validate()) {
               final userProvider = context.read<UserProvider>();
               userProvider.updateUser(
-                name: userProvider.name, 
-                email: userProvider.email, 
+                name: _nameController.text,
+                email: userProvider.email, // Keep the existing email
                 contactNumber: _contactController.text,
               );
               Navigator.pop(context);
