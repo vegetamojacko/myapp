@@ -12,9 +12,10 @@ class SubscriptionScreen extends StatelessWidget {
   void _selectPlan(BuildContext context, String planName, String planPrice) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final bankingProvider = Provider.of<BankingProvider>(context, listen: false);
+    final price = _parsePrice(planPrice);
 
     if (bankingProvider.bankingInfo != null) {
-      userProvider.updateSubscription(planName, planPrice);
+      userProvider.updateSubscription(planName, price);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Successfully changed to $planName!'),
@@ -22,8 +23,8 @@ class SubscriptionScreen extends StatelessWidget {
         ),
       );
     } else {
-      userProvider.updateSubscription(planName, planPrice);
-      showBankingDetailsModal(context, planName, planPrice);
+      userProvider.updateSubscription(planName, price);
+      showBankingDetailsModal(context, planName, price.toString());
     }
   }
 
@@ -40,264 +41,77 @@ class SubscriptionScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Subscription Plans'),
-        automaticallyImplyLeading: false,
+        title: const Text('Subscriptions'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => GoRouter.of(context).pop(),
+        ),
       ),
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildCarWashSubscription(context, currentPlan,
-                bankingProvider.bankingInfo != null),
-            const SizedBox(height: 24),
-            _buildPricingPlan(
+            const Text(
+              'Choose your plan',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            _buildPlanCard(
               context,
-              title: 'Starter Vibes',
-              price: 'R249/month',
-              description:
-                  'Perfect for students or anyone looking to start small.',
-              features: [
-                'Claim tickets for events of your choice',
-                'Affordable entry into the Candibean experience',
-                'Great for concerts, movies, or casual nights out',
-              ],
-              buttonColor: const Color(0xFF28A745),
-              buttonTextColor: Colors.white,
-              currentPlan: currentPlan,
-              hasBankingDetails: bankingProvider.bankingInfo != null,
+              'Basic Plan',
+              'R150/month',
+              ['5 Claims', 'Up to R500 per claim', 'Email support'],
+              currentPlan?['name'] == 'Basic Plan',
+              bankingProvider.bankingInfo != null,
             ),
-            const SizedBox(height: 24),
-            _buildPricingPlan(
+            const SizedBox(height: 20),
+            _buildPlanCard(
               context,
-              title: 'Momentum Wave',
-              price: 'R349/month',
-              description:
-                  'For those who want a little more energy and variety.',
-              features: [
-                'Access to bigger events and more ticket options',
-                'Extra flexibility to claim the events you love',
-                'Ideal for young professionals and groups of friends',
-              ],
-              buttonColor: const Color(0xFFFD7E14),
-              buttonTextColor: Colors.white,
-              currentPlan: currentPlan,
-              hasBankingDetails: bankingProvider.bankingInfo != null,
+              'Premium Plan',
+              'R300/month',
+              ['Unlimited Claims', 'Up to R2000 per claim', '24/7 support'],
+              currentPlan?['name'] == 'Premium Plan',
+              bankingProvider.bankingInfo != null,
             ),
-            const SizedBox(height: 24),
-            _buildPricingPlan(
-              context,
-              title: 'Elite Experience',
-              price: 'R549/month',
-              description: 'Go all out with the full Candibean lifestyle.',
-              features: [
-                'Premium access to top-tier events',
-                'Bigger savings on high-demand tickets',
-                'Tailored for couples, VIP vibes, and event lovers',
-              ],
-              buttonColor: const Color(0xFF6F42C1),
-              buttonTextColor: Colors.white,
-              currentPlan: currentPlan,
-              hasBankingDetails: bankingProvider.bankingInfo != null,
-            ),
-            const SizedBox(height: 32),
-            TextButton(
-              onPressed: () {
-                context.go('/home');
-              },
-              child: const Text('Skip for now'),
-            ),
-            const SizedBox(height: 16),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCarWashSubscription(
-      BuildContext context, Map<String, dynamic>? currentPlan, bool hasBankingDetails) {
-    const planName = 'Car Wash';
-    const planPrice = 'R100/month';
-    final isCurrentPlan = currentPlan != null && currentPlan['name'] == planName;
-    final planPriceNumber = _parsePrice(planPrice);
-    final currentPriceNumber =
-        currentPlan != null ? _parsePrice(currentPlan['price']) : 0.0;
-
-    String buttonText;
-    VoidCallback? onPressed;
-
-    if (hasBankingDetails) {
-      if (isCurrentPlan) {
-        buttonText = 'Current Plan';
-        onPressed = null;
-      } else if (planPriceNumber > currentPriceNumber) {
-        buttonText = 'Upgrade';
-        onPressed = () => _selectPlan(context, planName, planPrice);
-      } else {
-        buttonText = 'Downgrade';
-        onPressed = () => _selectPlan(context, planName, planPrice);
-      }
-    } else {
-      buttonText = 'Select Plan';
-      onPressed = () => _selectPlan(context, planName, planPrice);
-    }
-
+  Widget _buildPlanCard(BuildContext context, String planName, String planPrice,
+      List<String> features, bool isCurrentPlan, bool hasBankingInfo) {
     return Card(
-      elevation: 4.0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+      elevation: 4,
       child: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               planName,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 16.0),
-            const Text(
+            const SizedBox(height: 10),
+            Text(
               planPrice,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 36.0, fontWeight: FontWeight.bold, color: Colors.blue),
+              style: const TextStyle(fontSize: 18, color: Colors.grey),
             ),
-            const SizedBox(height: 16.0),
-            const Text(
-              'Why settle for ordinary when your car can shine like a VIP?',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16.0, color: Colors.grey),
-            ),
-            const SizedBox(height: 24.0),
-            const Text(
-              'What’s included:',
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16.0),
-            _buildFeatureRow(
-                'Priority service – your car gets first-class treatment',
-                color: Colors.blue),
-            _buildFeatureRow('Skip the queue', color: Colors.blue),
-            _buildFeatureRow(
-                'Eco-friendly products – gentle on your car paint',
-                color: Colors.blue),
-            _buildFeatureRow(
-                'VIP treatment while you wait – relax in comfort, we handle the shine',
-                color: Colors.blue),
-            const SizedBox(height: 24.0),
-            ElevatedButton(
-              onPressed: onPressed,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0)),
-              ),
-              child: Text(buttonText, style: const TextStyle(fontSize: 18.0)),
-            ),
+            const SizedBox(height: 10),
+            ...features.map((feature) => Text('• $feature')),
+            const SizedBox(height: 20),
+            isCurrentPlan
+                ? const Chip(
+                    label: Text('Current Plan'),
+                    backgroundColor: Colors.green,
+                  )
+                : ElevatedButton(
+                    onPressed: () => _selectPlan(context, planName, planPrice),
+                    child: const Text('Choose Plan'),
+                  ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildPricingPlan(
-    BuildContext context, {
-    required String title,
-    required String price,
-    required String description,
-    required List<String> features,
-    required Color buttonColor,
-    required Color buttonTextColor,
-    required Map<String, dynamic>? currentPlan,
-    required bool hasBankingDetails,
-  }) {
-    final isCurrentPlan = currentPlan != null && currentPlan['name'] == title;
-    final planPriceNumber = _parsePrice(price);
-    final currentPriceNumber =
-        currentPlan != null ? _parsePrice(currentPlan['price']) : 0.0;
-
-    String buttonText;
-    VoidCallback? onPressed;
-
-    if (hasBankingDetails) {
-      if (isCurrentPlan) {
-        buttonText = 'Current Plan';
-        onPressed = null;
-      } else if (planPriceNumber > currentPriceNumber) {
-        buttonText = 'Upgrade';
-        onPressed = () => _selectPlan(context, title, price);
-      } else {
-        buttonText = 'Downgrade';
-        onPressed = () => _selectPlan(context, title, price);
-      }
-    } else {
-      buttonText = 'Select Plan';
-      onPressed = () => _selectPlan(context, title, price);
-    }
-
-    return Card(
-      elevation: 4.0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16.0),
-            Text(
-              price,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 48.0, fontWeight: FontWeight.bold, color: buttonColor),
-            ),
-            const Text(
-              'per month',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16.0, color: Colors.grey),
-            ),
-            const SizedBox(height: 24.0),
-            Text(
-              description,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16.0, color: Colors.grey),
-            ),
-            const SizedBox(height: 24.0),
-            ...features
-                .map((feature) => _buildFeatureRow(feature, color: buttonColor)),
-            const SizedBox(height: 24.0),
-            ElevatedButton(
-              onPressed: onPressed,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: buttonColor,
-                foregroundColor: buttonTextColor,
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0)),
-              ),
-              child: Text(buttonText, style: const TextStyle(fontSize: 18.0)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFeatureRow(String feature, {required Color color}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Icon(Icons.check_circle, color: color, size: 24),
-          const SizedBox(width: 16),
-          Expanded(child: Text(feature, style: const TextStyle(fontSize: 16.0))),
-        ],
       ),
     );
   }

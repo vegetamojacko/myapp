@@ -1,10 +1,11 @@
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/user_provider.dart';
+import '../services/auth_service.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -14,7 +15,9 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
+  final AuthService _authService = AuthService();
   bool _isLogin = true;
+  bool _isLoading = false;
   final _loginFormKey = GlobalKey<FormState>();
   final _registerFormKey = GlobalKey<FormState>();
 
@@ -23,11 +26,81 @@ class _AuthScreenState extends State<AuthScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _loginEmailController = TextEditingController();
+  final _loginPasswordController = TextEditingController();
 
   void _toggleForm() {
     setState(() {
       _isLogin = !_isLogin;
     });
+  }
+
+  Future<void> _login() async {
+    if (_loginFormKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+      try {
+        User? user = await _authService.signIn(
+          _loginEmailController.text,
+          _loginPasswordController.text,
+        );
+        if (!mounted) return;
+        if (user != null) {
+          context.go('/home');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Login failed. Please try again.')),
+          );
+        }
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login failed: ${e.toString()}')),
+        );
+      }
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _register() async {
+    if (_registerFormKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+      try {
+        User? user = await _authService.register(
+          _emailController.text,
+          _passwordController.text,
+          _nameController.text,
+          _whatsappController.text,
+        );
+        if (!mounted) return;
+        if (user != null) {
+          Provider.of<UserProvider>(context, listen: false).updateUser(
+            name: _nameController.text,
+            email: _emailController.text,
+            contactNumber: _whatsappController.text,
+          );
+          context.go('/subscription');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Registration failed. Please try again.')),
+          );
+        }
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Registration failed: ${e.toString()}')),
+        );
+      }
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -38,9 +111,11 @@ class _AuthScreenState extends State<AuthScreen> {
           padding: const EdgeInsets.all(24.0),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
-            child: _isLogin
-                ? _buildLoginForm(context)
-                : _buildRegisterForm(context),
+            child: _isLoading
+                ? const CircularProgressIndicator()
+                : _isLogin
+                    ? _buildLoginForm(context)
+                    : _buildRegisterForm(context),
           ),
         ),
       ),
@@ -63,6 +138,7 @@ class _AuthScreenState extends State<AuthScreen> {
           const Text('Log in to your account'),
           const SizedBox(height: 32),
           TextFormField(
+            controller: _loginEmailController,
             decoration: const InputDecoration(
               labelText: 'Email address',
               border: OutlineInputBorder(),
@@ -76,6 +152,7 @@ class _AuthScreenState extends State<AuthScreen> {
           ),
           const SizedBox(height: 16),
           TextFormField(
+            controller: _loginPasswordController,
             obscureText: true,
             decoration: const InputDecoration(
               labelText: 'Password',
@@ -90,12 +167,7 @@ class _AuthScreenState extends State<AuthScreen> {
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () {
-              if (_loginFormKey.currentState!.validate()) {
-                // TODO: Implement login logic
-                context.go('/home');
-              }
-            },
+            onPressed: _isLoading ? null : _login,
             child: const Text('Log In'),
           ),
           const SizedBox(height: 16),
@@ -137,7 +209,7 @@ class _AuthScreenState extends State<AuthScreen> {
             },
           ),
           const SizedBox(height: 16),
-           TextFormField(
+          TextFormField(
             controller: _whatsappController,
             decoration: const InputDecoration(
               labelText: 'WhatsApp Number',
@@ -179,7 +251,7 @@ class _AuthScreenState extends State<AuthScreen> {
               return null;
             },
           ),
-           const SizedBox(height: 16),
+          const SizedBox(height: 16),
           TextFormField(
             controller: _confirmPasswordController,
             obscureText: true,
@@ -198,16 +270,7 @@ class _AuthScreenState extends State<AuthScreen> {
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () {
-              if (_registerFormKey.currentState!.validate()) {
-                Provider.of<UserProvider>(context, listen: false).updateUser(
-                  name: _nameController.text,
-                  email: _emailController.text,
-                  contactNumber: _whatsappController.text,
-                );
-                context.go('/subscription');
-              }
-            },
+            onPressed: _isLoading ? null : _register,
             child: const Text('Create Account'),
           ),
           const SizedBox(height: 16),

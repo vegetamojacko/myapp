@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -5,6 +9,7 @@ import 'package:provider/provider.dart';
 import './app_router.dart';
 import './blocs/claims/claims_bloc.dart';
 import './blocs/claims/claims_event.dart';
+import './firebase_options.dart';
 import './providers/banking_provider.dart';
 import './providers/navigation_provider.dart';
 import './providers/theme_provider.dart';
@@ -12,12 +17,16 @@ import './providers/user_provider.dart';
 import './services/storage_service.dart';
 import './utils/app_themes.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const App());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class App extends StatelessWidget {
+  const App({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,21 +37,59 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(create: (_) => BankingProvider()),
         BlocProvider(
-          create: (_) =>
-              ClaimsBloc(storageService: StorageService())..add(LoadClaims()),
+          create: (context) => ClaimsBloc(storageService: StorageService()),
         ),
       ],
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, child) {
-          return MaterialApp.router(
-            routerConfig: AppRouter.router,
-            title: 'Claims App',
-            theme: AppThemes.lightTheme,
-            darkTheme: AppThemes.darkTheme,
-            themeMode: themeProvider.themeMode,
-          );
-        },
-      ),
+      child: const MyApp(),
+    );
+  }
+}
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late StreamSubscription<User?> _authSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _authSubscription =
+        FirebaseAuth.instance.authStateChanges().listen((user) {
+      final claimsBloc = context.read<ClaimsBloc>();
+      final userProvider = context.read<UserProvider>();
+      if (user != null) {
+        userProvider.loadUserData(user);
+        claimsBloc.add(LoadClaims());
+      } else {
+        userProvider.clearUserData();
+        claimsBloc.add(LoadClaims()); // Or an event that clears the claims
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _authSubscription.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp.router(
+          routerConfig: AppRouter.router,
+          title: 'Claims App',
+          theme: AppThemes.lightTheme,
+          darkTheme: AppThemes.darkTheme,
+          themeMode: themeProvider.themeMode,
+        );
+      },
     );
   }
 }

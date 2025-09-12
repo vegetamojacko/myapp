@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "868312086400",
+    "firebase_url": "https://candibean-android-app-default-rtdb.firebaseio.com",
+    "project_id": "candibean-android-app",
+    "storage_bucket": "candibean-android-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:868312086400:android:17b6c66d153ba500cbf365",
+        "android_client_info": {
+          "package_name": "com.example.myapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "868312086400-6mfpff1mgrjjshi2s87r4f089t5m50bt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApOTD-InRVl7C058tMryXxihh4ZKkvnFw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "868312086400-6mfpff1mgrjjshi2s87r4f089t5m50bt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

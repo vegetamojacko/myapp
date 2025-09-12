@@ -41,85 +41,88 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildWelcomeBanner(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
-    final bankingProvider = Provider.of<BankingProvider>(context);
-    final plan = userProvider.selectedPlan;
+    return Consumer<UserProvider>(
+      builder: (context, userProvider, child) {
+        final bankingProvider = Provider.of<BankingProvider>(context);
+        final plan = userProvider.selectedPlan;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24.0),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Theme.of(context).colorScheme.primary,
-            Theme.of(context).colorScheme.primary.withAlpha(200),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16.0),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Welcome Back, ${userProvider.name}!',
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall!
-                .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24.0),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.primary.withAlpha(200),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(16.0),
           ),
-          const SizedBox(height: 8),
-          if (plan != null) ...[
-            if (bankingProvider.bankingInfo == null)
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Text(
-                'Joined: ${plan['dateJoined'].toString()}',
+                'Welcome Back, ${userProvider.name}!',
                 style: Theme.of(context)
                     .textTheme
-                    .bodyLarge!
-                    .copyWith(color: Colors.white70),
-              )
-            else
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                    .headlineSmall!
+                    .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              if (plan != null) ...[
+                if (bankingProvider.bankingInfo == null)
                   Text(
-                    'Current Plan: ${plan['name']}',
+                    'Joined: ${plan['dateJoined'].toString()}',
                     style: Theme.of(context)
                         .textTheme
                         .bodyLarge!
                         .copyWith(color: Colors.white70),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
+                  )
+                else
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: _buildInfoColumn(
-                            context, 'Joined', plan['dateJoined'].toString()),
+                      Text(
+                        'Current Plan: ${plan['name']}',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyLarge!
+                            .copyWith(color: Colors.white70),
                       ),
-                      Expanded(
-                        child: _buildInfoColumn(context, 'Available',
-                            'R${plan['amountAvailable'].toStringAsFixed(2)}'),
-                      ),
-                      Expanded(
-                        child: _buildInfoColumn(context, 'Used',
-                            'R${plan['amountUsed'].toStringAsFixed(2)}'),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildInfoColumn(
+                                context, 'Joined', plan['dateJoined'].toString()),
+                          ),
+                          Expanded(
+                            child: _buildInfoColumn(context, 'Available',
+                                'R${plan['amountAvailable'].toStringAsFixed(2)}'),
+                          ),
+                          Expanded(
+                            child: _buildInfoColumn(context, 'Used',
+                                'R${plan['amountUsed'].toStringAsFixed(2)}'),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
-          ] else ...[
-            Text(
-              'No active plan.',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyLarge!
-                  .copyWith(color: Colors.white70),
-            )
-          ]
-        ],
-      ),
+              ] else ...[
+                Text(
+                  'No active plan.',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyLarge!
+                      .copyWith(color: Colors.white70),
+                )
+              ]
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -208,7 +211,7 @@ class HomeScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(12.0),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withAlpha(13),
                 spreadRadius: 1,
                 blurRadius: 5,
                 offset: const Offset(0, 3),
