@@ -1,3 +1,4 @@
+
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -17,16 +18,20 @@ import './providers/user_provider.dart';
 import './services/storage_service.dart';
 import './utils/app_themes.dart';
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const App());
+  runApp(App());
 }
 
 class App extends StatelessWidget {
-  const App({super.key});
+  final AppRouter _appRouter = AppRouter(navigatorKey);
+
+  App({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -40,13 +45,15 @@ class App extends StatelessWidget {
           create: (context) => ClaimsBloc(storageService: StorageService()),
         ),
       ],
-      child: const MyApp(),
+      child: MyApp(appRouter: _appRouter),
     );
   }
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  final AppRouter appRouter;
+
+  const MyApp({super.key, required this.appRouter});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -83,7 +90,7 @@ class _MyAppState extends State<MyApp> {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp.router(
-          routerConfig: AppRouter.router,
+          routerConfig: widget.appRouter.router,
           title: 'Claims App',
           theme: AppThemes.lightTheme,
           darkTheme: AppThemes.darkTheme,

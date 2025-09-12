@@ -100,11 +100,11 @@ class HomeScreen extends StatelessWidget {
                           ),
                           Expanded(
                             child: _buildInfoColumn(context, 'Available',
-                                'R${plan['amountAvailable'].toStringAsFixed(2)}'),
+                                'R${(plan['amountAvailable'] ?? 0.0).toStringAsFixed(2)}'),
                           ),
                           Expanded(
                             child: _buildInfoColumn(context, 'Used',
-                                'R${plan['amountUsed'].toStringAsFixed(2)}'),
+                                'R${(plan['amountUsed'] ?? 0.0).toStringAsFixed(2)}'),
                           ),
                         ],
                       ),
@@ -154,7 +154,7 @@ class HomeScreen extends StatelessWidget {
     final bankingProvider = Provider.of<BankingProvider>(context);
     final plan = userProvider.selectedPlan;
     final bool isEligible = plan != null &&
-        plan['amountAvailable'] >= 100 &&
+        (plan['amountAvailable'] ?? 0.0) >= 100 &&
         bankingProvider.bankingInfo != null;
 
     return Column(

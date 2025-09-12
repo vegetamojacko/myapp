@@ -1,3 +1,4 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,13 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateSubscription(String planName, double planPrice) {
+  double _parsePrice(String priceString) {
+    final cleanPrice = priceString.replaceAll(RegExp(r'[^\d.]'), '');
+    return double.tryParse(cleanPrice) ?? 0.0;
+  }
+
+  void updateSubscription(String planName, String planPriceString) {
+    final double planPrice = _parsePrice(planPriceString);
     _selectedPlan = {
       'name': planName,
       'price': planPrice,
@@ -42,7 +49,23 @@ class UserProvider with ChangeNotifier {
         _name = data['name'] ?? '';
         _email = data['email'] ?? '';
         _contactNumber = data['whatsapp'] ?? '';
-        _selectedPlan = data['selectedPlan'];
+        
+        // Handle price conversion from Firestore (it can be int or double)
+        if (data['selectedPlan'] != null) {
+            final plan = data['selectedPlan'] as Map<String, dynamic>;
+            if (plan['price'] is num) {
+                 _selectedPlan = {
+                    'name': plan['name'],
+                    'price': (plan['price'] as num).toDouble(),
+                    'date': plan['date'],
+                 };
+            } else {
+                 _selectedPlan = plan;
+            }
+        } else {
+            _selectedPlan = null;
+        }
+
         notifyListeners();
       }
     } catch (e) {
@@ -66,7 +89,7 @@ class UserProvider with ChangeNotifier {
           {
             'selectedPlan': _selectedPlan,
           },
-          SetOptions(merge: true), // Use merge to avoid overwriting other user data
+          SetOptions(merge: true),
         );
         developer.log('Successfully updated plan in Firestore for UID: ${currentUser.uid}', name: 'UserProvider');
       } catch (e, s) {
@@ -76,7 +99,6 @@ class UserProvider with ChangeNotifier {
           error: e,
           stackTrace: s,
         );
-        // Optionally, handle the error (e.g., show a message to the user)
       }
     }
   }

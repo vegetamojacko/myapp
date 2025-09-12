@@ -1,30 +1,59 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:myapp/blocs/claims/claims_bloc.dart';
+import 'package:myapp/providers/banking_provider.dart';
+import 'package:myapp/providers/navigation_provider.dart';
+import 'package:myapp/providers/user_provider.dart';
+import 'package:myapp/screens/home_screen.dart';
 
-import 'package:myapp/main.dart';
+// A mock GoRouter for testing
+final _mockRouter = GoRouter(
+  routes: [
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const HomeScreen(),
+    ),
+  ],
+);
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('HomeScreen renders correctly', (WidgetTester tester) async {
+    // Build the HomeScreen widget with all necessary providers.
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => UserProvider()),
+          ChangeNotifierProvider(create: (_) => BankingProvider()),
+          ChangeNotifierProvider(create: (_) => NavigationProvider()),
+        ],
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (_) => ClaimsBloc()),
+          ],
+          child: MaterialApp.router(
+            routerConfig: _mockRouter,
+          ),
+        ),
+      ),
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Wait for the widget to build.
+    await tester.pumpAndSettle();
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Verify that the welcome message is displayed.
+    // The user provider is new, so the name will be an empty string.
+    expect(find.text('Welcome Back, !'), findsOneWidget);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify that the 'Quick Actions' title is displayed.
+    expect(find.text('Quick Actions'), findsOneWidget);
+
+    // Verify that the 'Recent Claims' title is displayed.
+    expect(find.text('Recent Claims'), findsOneWidget);
+
+    // Verify that the 'No recent claims.' message is shown initially.
+    expect(find.text('No recent claims.'), findsOneWidget);
   });
 }
