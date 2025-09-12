@@ -148,9 +148,11 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildQuickActions(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
+    final bankingProvider = Provider.of<BankingProvider>(context);
     final plan = userProvider.selectedPlan;
-    final hasPlan = plan != null;
-    final hasSufficientFunds = hasPlan && plan['amountAvailable'] >= 100;
+    final bool isEligible = plan != null &&
+        plan['amountAvailable'] >= 100 &&
+        bankingProvider.bankingInfo != null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,14 +169,15 @@ class HomeScreen extends StatelessWidget {
               context,
               icon: Icons.event,
               label: 'Claim Event',
-              onTap: null,
+              onTap: isEligible ? () => _showAddClaimSheet(context) : null,
             ),
             _buildActionCard(
               context,
               icon: Icons.directions_car,
               label: 'Claim Car Wash',
-              onTap:
-                  hasSufficientFunds && hasPlan ? () => _showCarWashClaimSheet(context, claim: null) : null,
+              onTap: isEligible
+                  ? () => _showCarWashClaimSheet(context, claim: null)
+                  : null,
             ),
             _buildActionCard(
               context,

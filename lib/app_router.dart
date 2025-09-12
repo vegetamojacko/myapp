@@ -5,7 +5,7 @@ import './screens/auth_screen.dart';
 import './screens/banking_details_screen.dart';
 import './screens/subscription_screen.dart';
 import './screens/splash_screen.dart';
-import 'main.dart';
+import './screens/main_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(

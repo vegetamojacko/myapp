@@ -2,10 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class UserProvider with ChangeNotifier {
-  String _name = '';
+  String _name = 'Alex Doe';
   String _email = 'alex.doe@example.com';
   String _contactNumber = '';
-  Map<String, dynamic>? _selectedPlan;
+  Map<String, dynamic>? _selectedPlan = {
+    'name': 'Premium Ticket Insurance',
+    'price': r'$49.99/month',
+    'benefits': 'Event cancellations, Postponements, and more',
+    'dateJoined': DateFormat('yyyy-MM-dd').format(DateTime.now()),
+    'amountAvailable': 4000.0,
+    'amountUsed': 0.0,
+  };
 
   String get name => _name;
   String get email => _email;
