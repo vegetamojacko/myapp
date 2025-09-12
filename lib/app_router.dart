@@ -4,14 +4,19 @@ import 'package:go_router/go_router.dart';
 import './screens/auth_screen.dart';
 import './screens/banking_details_screen.dart';
 import './screens/subscription_screen.dart';
+import './screens/splash_screen.dart';
 import 'main.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
-    initialLocation: '/',
+    initialLocation: '/splash',
     routes: [
+       GoRoute(
+        path: '/splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
-        path: '/',
+        path: '/auth',
         builder: (context, state) => const AuthScreen(),
       ),
       GoRoute(

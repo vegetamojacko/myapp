@@ -1,27 +1,34 @@
-
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Base Palette (Neutrals)
-  static const Color background = Color(0xFFF0F2F5);
-  static const Color contentCard = Color(0xFFFFFFFF);
-  static const Color primaryText = Color(0xFF1F2937);
-  static const Color darkGradientStart = Color(0xFF1F2937);
-  static const Color darkGradientEnd = Color(0xFF111827);
+  // Palette from the new logo
+  static const Color primaryColor = Color(0xFF00838F); // Teal from logo
+  static const Color accentColor = Color(0xFFF57C00);  // Orange from logo
 
-  // Accent Palette (Action & Status Colors)
-  static const Color primaryActionStart = Color(0xFF3B82F6);
-  static const Color primaryActionEnd = Color(0xFF6366F1);
+  // Light Theme
+  static const Color lightBackground = Color(0xFFF5F5F5);
+  static const Color lightPrimaryText = Color(0xFF212121);
+  static const Color lightCard = Colors.white;
 
-  // Semantic Colors - Pending
-  static const Color pendingBackground = Color(0xFFFEF3C7);
-  static const Color pendingText = Color(0xFF92400E);
+  // Dark Theme
+  static const Color darkBackground = Color(0xFF121212);
+  static const Color darkPrimaryText = Colors.white;
+  static const Color darkCard = Color(0xFF212121);
 
-  // Semantic Colors - Completed
-  static const Color completedBackground = Color(0xFFD1FAE5);
-  static const Color completedText = Color(0xFF065F46);
+  // Semantic Colors (retained for status indicators)
+  static const Color pendingBackground = Color(0xFFFFFDE7);
+  static const Color pendingText = Color(0xFF8D6E63);
+  static const Color completedBackground = Color(0xFFE8F5E9);
+  static const Color completedText = Color(0xFF2E7D32);
+  static const Color failedBackground = Color(0xFFFFEBEE);
+  static const Color failedText = Color(0xFFC62828);
 
-  // Semantic Colors - Failed
-  static const Color failedBackground = Color(0xFFFEE2E2);
-  static const Color failedText = Color(0xFF991B1B);
+  // Deprecated colors - to be removed in a future update
+  static const Color background = lightBackground;
+  static const Color contentCard = lightCard;
+  static const Color primaryText = lightPrimaryText;
+  static const Color darkGradientStart = darkBackground;
+  static const Color darkGradientEnd = darkBackground;
+  static const Color primaryActionStart = primaryColor;
+  static const Color primaryActionEnd = accentColor;
 }

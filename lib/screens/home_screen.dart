@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -68,7 +69,7 @@ class HomeScreen extends StatelessWidget {
                 .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          if (plan != null)
+          if (plan != null) ...[
             if (bankingProvider.bankingInfo == null)
               Text(
                 'Joined: ${plan['dateJoined'].toString()}',
@@ -107,6 +108,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ],
               ),
+          ],
         ],
       ),
     );
@@ -137,8 +139,9 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildQuickActions(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
-    final isCarWashPlan = userProvider.selectedPlan != null &&
-        userProvider.selectedPlan!['name'] == 'Car Wash';
+    final plan = userProvider.selectedPlan;
+    final hasPlan = plan != null;
+    final hasSufficientFunds = hasPlan && plan['amountAvailable'] >= 100;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,13 +158,13 @@ class HomeScreen extends StatelessWidget {
               context,
               icon: Icons.event,
               label: 'Claim Event',
-              onTap: isCarWashPlan ? null : () => _showAddClaimSheet(context),
+              onTap: null,
             ),
             _buildActionCard(
               context,
               icon: Icons.directions_car,
               label: 'Claim Car Wash',
-              onTap: () => _showCarWashClaimSheet(context, claim: null),
+              onTap: hasSufficientFunds ? () => _showCarWashClaimSheet(context, claim: null) : null,
             ),
             _buildActionCard(
               context,

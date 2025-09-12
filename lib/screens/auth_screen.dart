@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -52,6 +53,11 @@ class _AuthScreenState extends State<AuthScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          SvgPicture.asset(
+            'assets/Candibean.svg',
+            height: 100,
+          ),
+          const SizedBox(height: 24),
           Text('Welcome Back', style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(height: 8),
           const Text('Log in to your account'),
@@ -108,6 +114,11 @@ class _AuthScreenState extends State<AuthScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          SvgPicture.asset(
+            'assets/Candibean.svg',
+            height: 100,
+          ),
+          const SizedBox(height: 24),
           Text('Create Account', style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(height: 8),
           const Text('Fill in your details to get started'),

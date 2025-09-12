@@ -31,25 +31,25 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextTheme appTextTheme = TextTheme(
       displayLarge:
-          GoogleFonts.oswald(fontSize: 57, fontWeight: FontWeight.bold, color: AppColors.primaryText),
+          GoogleFonts.oswald(fontSize: 57, fontWeight: FontWeight.bold, color: AppColors.lightPrimaryText),
       titleLarge:
-          GoogleFonts.roboto(fontSize: 22, fontWeight: FontWeight.w500, color: AppColors.primaryText),
-      bodyMedium: GoogleFonts.openSans(fontSize: 14, color: AppColors.primaryText),
+          GoogleFonts.roboto(fontSize: 22, fontWeight: FontWeight.w500, color: AppColors.lightPrimaryText),
+      bodyMedium: GoogleFonts.openSans(fontSize: 14, color: AppColors.lightPrimaryText),
     );
 
     final ThemeData lightTheme = ThemeData(
       useMaterial3: true,
-      scaffoldBackgroundColor: AppColors.background,
+      scaffoldBackgroundColor: AppColors.lightBackground,
       colorScheme: const ColorScheme.light(
-        primary: AppColors.primaryActionStart,
-        secondary: AppColors.primaryActionEnd,
-        surface: AppColors.contentCard,
-        onSurface: AppColors.primaryText,
+        primary: AppColors.primaryColor,
+        secondary: AppColors.accentColor,
+        surface: AppColors.lightCard,
+        onSurface: AppColors.lightPrimaryText,
         error: AppColors.failedText,
       ),
       textTheme: appTextTheme,
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.darkGradientStart,
+        backgroundColor: AppColors.primaryColor,
         foregroundColor: Colors.white,
         titleTextStyle:
             GoogleFonts.oswald(fontSize: 24, fontWeight: FontWeight.bold),
@@ -57,7 +57,7 @@ class MyApp extends StatelessWidget {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           foregroundColor: Colors.white,
-          backgroundColor: AppColors.primaryActionStart,
+          backgroundColor: AppColors.primaryColor,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -66,7 +66,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       cardTheme: const CardThemeData(
-        color: AppColors.contentCard,
+        color: AppColors.lightCard,
         elevation: 1,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -76,25 +76,25 @@ class MyApp extends StatelessWidget {
 
     final ThemeData darkTheme = ThemeData(
       useMaterial3: true,
-      scaffoldBackgroundColor: AppColors.darkGradientEnd,
+      scaffoldBackgroundColor: AppColors.darkBackground,
       colorScheme: const ColorScheme.dark(
-        primary: AppColors.primaryActionStart,
-        secondary: AppColors.primaryActionEnd,
-        surface: AppColors.darkGradientStart,
-        onSurface: Colors.white,
+        primary: AppColors.primaryColor,
+        secondary: AppColors.accentColor,
+        surface: AppColors.darkCard,
+        onSurface: AppColors.darkPrimaryText,
         error: AppColors.failedBackground,
       ),
-      textTheme: appTextTheme.apply(bodyColor: Colors.white, displayColor: Colors.white),
+      textTheme: appTextTheme.apply(bodyColor: AppColors.darkPrimaryText, displayColor: AppColors.darkPrimaryText),
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.darkGradientStart,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.darkCard,
+        foregroundColor: AppColors.darkPrimaryText,
         titleTextStyle:
-            GoogleFonts.oswald(fontSize: 24, fontWeight: FontWeight.bold),
+            GoogleFonts.oswald(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.darkPrimaryText),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           foregroundColor: Colors.white,
-          backgroundColor: AppColors.primaryActionStart,
+          backgroundColor: AppColors.primaryColor,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -103,7 +103,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
        cardTheme: const CardThemeData(
-        color: AppColors.darkGradientStart,
+        color: AppColors.darkCard,
         elevation: 1,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -168,7 +168,7 @@ class _MainScreenState extends State<MainScreen> {
       _selectedIndex = index;
       _pageController.animateToPage(
         index,
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300), 
         curve: Curves.easeInOut,
       );
     });

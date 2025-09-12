@@ -159,7 +159,7 @@ class ProfileScreen extends StatelessWidget {
                 title: const Text('Logout'),
                 trailing: const Icon(Icons.logout),
                 onTap: () {
-                  context.go('/');
+                  context.go('/auth');
                 },
               ),
             ],

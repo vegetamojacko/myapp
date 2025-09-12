@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -121,14 +123,30 @@ class _ClaimDetailsScreenState extends State<ClaimDetailsScreen> {
                 ),
                 const SizedBox(height: 16),
                 const Text('Wash Options'),
-                _RadioGroup(
-                  selectedValue: _selectedWash,
-                  onChanged: (String? value) {
-                    setState(() {
-                      _selectedWash = value!;
-                    });
-                  },
-                  options: _washOptions,
+                Column(
+                  children: _washOptions.map((option) {
+                    return InkWell(
+                      onTap: () {
+                        setState(() {
+                          _selectedWash = option['value']!;
+                        });
+                      },
+                      child: Row(
+                        children: [
+                          Radio<String>(
+                            value: option['value']!,
+                            groupValue: _selectedWash,
+                            onChanged: (String? value) {
+                              setState(() {
+                                _selectedWash = value!;
+                              });
+                            },
+                          ),
+                          Text(option['title']!),
+                        ],
+                      ),
+                    );
+                  }).toList(),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
@@ -140,50 +158,6 @@ class _ClaimDetailsScreenState extends State<ClaimDetailsScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _RadioGroup extends StatefulWidget {
-  final String selectedValue;
-  final ValueChanged<String?> onChanged;
-  final List<Map<String, String>> options;
-
-  const _RadioGroup({
-    required this.selectedValue,
-    required this.onChanged,
-    required this.options,
-  });
-
-  @override
-  State<_RadioGroup> createState() => _RadioGroupState();
-}
-
-class _RadioGroupState extends State<_RadioGroup> {
-  late String _selectedValue;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedValue = widget.selectedValue;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: widget.options.map((option) {
-        return RadioListTile<String>(
-          title: Text(option['title']!),
-          value: option['value']!,
-          groupValue: _selectedValue,
-          onChanged: (String? value) {
-            setState(() {
-              _selectedValue = value!;
-            });
-            widget.onChanged(value);
-          },
-        );
-      }).toList(),
     );
   }
 }
