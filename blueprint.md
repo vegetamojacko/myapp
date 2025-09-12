@@ -1,33 +1,41 @@
-# Blueprint
+# Project Overview
 
-## Overview
-
-This document outlines the project structure, design, and features of the Candibean app. The app allows users to claim tickets for events, manage their profile, and choose a subscription plan.
+This document outlines the project structure, features, and implementation details of the claims management application. It serves as a single source of truth for the application's design and functionality.
 
 ## Style and Design
 
-- **Theme:** The app uses a Material 3 design with a primary color of deep purple. It supports both light and dark modes.
-- **Typography:** The app uses Google Fonts for a modern and readable look. Oswald is used for display text, Roboto for titles, and Open Sans for body text.
-- **Components:** The app uses custom-styled widgets for a consistent and branded feel. Buttons, text fields, and cards have been designed to match the overall theme.
+The application follows the Material Design guidelines, with a clean and modern user interface. The color scheme is based on a primary color of deep purple, with a light and dark theme available to the user. The typography uses the Oswald, Roboto, and Open Sans fonts from Google Fonts to create a clear and readable hierarchy.
 
-## Features
+## Implemented Features
 
-### Implemented
+### User Authentication
 
-- **Home Screen:** A landing page for the app that displays user information and the currently selected subscription plan.
-- **Claims Screen:** Users can view and manage their claimed tickets.
-- **Profile Screen:** Users can view and edit their profile information.
-- **Subscription Screen:** Users can view and choose from different subscription plans.
-- **Subscription Management:**
-    - When a user selects a subscription plan from the `SubscriptionScreen`, the `UserProvider` is updated with the selected plan's details.
-    - The `HomeScreen` listens for changes in the `UserProvider` and displays the name and benefits of the selected plan.
-    - If no plan is selected, the `HomeScreen` prompts the user to choose one.
-- **Layout Bug Fix:**
-    - Resolved a `RenderFlex` overflow error on the `HomeScreen` by wrapping a `Wrap` widget with a `Flexible` widget to ensure it correctly constrains its children.
-    - Fixed an initial `RenderFlex` overflow by wrapping a `Text` widget in an `Expanded` widget.
+- **Login and Registration:** Users can create an account and log in to the application.
+- **User Profile:** Users can view and edit their profile information.
 
-### Current Plan: Add Car Wash Screen
+### Claims Management
 
-- [x] Create a new `car_wash_screen.dart` file in the `lib/screens` directory.
-- [x] Implement a basic layout for the car wash screen, including an image, title, description, and a "Book Now" button.
-- [x] Add navigation to the `CarWashScreen` from a button on the `HomeScreen`.
+- **Create Claim:** Users can create a new claim, either for a car wash or an event.
+- **View Claims:** Users can view a list of their existing claims.
+- **Claim Details:** Users can view the details of a specific claim.
+- **Claim Status:** The status of each claim is displayed, and users can track its progress.
+
+### Subscription Management
+
+- **View Subscriptions:** Users can view their current subscription plan.
+- **Select Plan:** Users can select a subscription plan that suits their needs.
+
+### Navigation
+
+- **Dashboard Navigation:** After submitting their banking details, users are automatically navigated to the dashboard.
+
+## Current Task: Navigate to Dashboard After Banking Details Submission
+
+### Objective
+
+Improve the user experience by automatically navigating the user to the dashboard after they have successfully submitted their banking details.
+
+### Implementation Steps
+
+1.  **Update `banking_details_modal.dart`:**
+    -   In the `_submitForm` function, after the banking information is successfully submitted, add a call to `context.read<NavigationProvider>().navigateToPage(0);` to navigate to the dashboard.

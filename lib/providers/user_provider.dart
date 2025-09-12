@@ -5,14 +5,7 @@ class UserProvider with ChangeNotifier {
   String _name = '';
   String _email = 'alex.doe@example.com';
   String _contactNumber = '';
-  Map<String, dynamic>? _selectedPlan = {
-    'name': 'Premium Ticket Insurance',
-    'price': r'$49.99/month',
-    'benefits': 'Event cancellations, Postponements, and more',
-    'dateJoined': DateFormat('yyyy-MM-dd').format(DateTime.now()),
-    'amountAvailable': 2500.0,
-    'amountUsed': 0.0,
-  };
+  Map<String, dynamic>? _selectedPlan;
 
   String get name => _name;
   String get email => _email;

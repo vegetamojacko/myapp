@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../blocs/claims/claims_bloc.dart';
@@ -108,7 +109,15 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ],
               ),
-          ],
+          ] else ...[
+            Text(
+              'No active plan.',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyLarge!
+                  .copyWith(color: Colors.white70),
+            )
+          ]
         ],
       ),
     );
@@ -164,13 +173,14 @@ class HomeScreen extends StatelessWidget {
               context,
               icon: Icons.directions_car,
               label: 'Claim Car Wash',
-              onTap: hasSufficientFunds ? () => _showCarWashClaimSheet(context, claim: null) : null,
+              onTap:
+                  hasSufficientFunds && hasPlan ? () => _showCarWashClaimSheet(context, claim: null) : null,
             ),
             _buildActionCard(
               context,
               icon: Icons.history,
               label: 'View History',
-              onTap: () => context.read<NavigationProvider>().navigateToPage(1),
+              onTap: () => context.go('/claims'),
             ),
           ],
         ),
@@ -191,8 +201,16 @@ class HomeScreen extends StatelessWidget {
           width: 100,
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(12.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                spreadRadius: 1,
+                blurRadius: 5,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

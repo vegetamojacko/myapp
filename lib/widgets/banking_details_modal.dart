@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/banking_provider.dart';
+import '../providers/navigation_provider.dart';
 
 void showBankingDetailsModal(
     BuildContext context, String planName, String planPrice) {
@@ -63,6 +64,7 @@ class _BankingDetailsFormState extends State<BankingDetailsForm> {
       );
       context.read<BankingProvider>().updateBankingInfo(bankingInfo);
       Navigator.pop(context); // Close the modal
+      context.read<NavigationProvider>().navigateToPage(0);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${widget.planName} selected!'),
