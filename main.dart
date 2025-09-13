@@ -1,3 +1,4 @@
+
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -72,11 +73,11 @@ class _MyAppState extends State<MyApp> {
 
       if (user != null) {
         userProvider.loadUserData(user);
-        bankingProvider.loadBankingInfo(user); // FIX: Load banking info on auth change
+        bankingProvider.loadBankingInfo(user); // Load banking info
         claimsBloc.add(LoadClaims());
       } else {
         userProvider.clearUserData();
-        bankingProvider.clearBankingInfo(); // FIX: Clear banking info on logout
+        bankingProvider.clearBankingInfo(); // Clear banking info
         claimsBloc.add(LoadClaims()); // Or an event that clears the claims
       }
     });

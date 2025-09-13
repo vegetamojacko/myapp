@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -30,17 +29,21 @@ class UserProvider with ChangeNotifier {
     return double.tryParse(cleanPrice) ?? 0.0;
   }
 
+  // FIX: Correctly set all plan details for Firestore sync.
   void updateSubscription(String planName, String planPriceString) {
     final double planPrice = _parsePrice(planPriceString);
     _selectedPlan = {
       'name': planName,
       'price': planPrice,
-      'date': Timestamp.now(),
+      'dateJoined': Timestamp.now(), // FIX: Use 'dateJoined' to match usage
+      'amountAvailable': 0.0, // FIX: Initialize amountAvailable to 0
+      'amountUsed': 0.0,            // FIX: Initialize amountUsed to 0
     };
     notifyListeners();
     _updatePlanInFirestore();
   }
 
+  // FIX: Load all plan details correctly from Firestore.
   Future<void> loadUserData(User user) async {
     try {
       final doc = await _firestore.collection('users').doc(user.uid).get();
@@ -50,26 +53,25 @@ class UserProvider with ChangeNotifier {
         _email = data['email'] ?? '';
         _contactNumber = data['whatsapp'] ?? '';
         
-        // Handle price conversion from Firestore (it can be int or double)
         if (data['selectedPlan'] != null) {
             final plan = data['selectedPlan'] as Map<String, dynamic>;
-            if (plan['price'] is num) {
-                 _selectedPlan = {
-                    'name': plan['name'],
-                    'price': (plan['price'] as num).toDouble(),
-                    'date': plan['date'],
-                 };
-            } else {
-                 _selectedPlan = plan;
-            }
+            _selectedPlan = {
+                'name': plan['name'],
+                // Handle price conversion safely
+                'price': (plan['price'] as num?)?.toDouble() ?? 0.0,
+                // Load the correct date field and other amounts
+                'dateJoined': plan['dateJoined'],
+                'amountAvailable': (plan['amountAvailable'] as num?)?.toDouble() ?? 0.0,
+                'amountUsed': (plan['amountUsed'] as num?)?.toDouble() ?? 0.0,
+            };
         } else {
             _selectedPlan = null;
         }
 
         notifyListeners();
       }
-    } catch (e) {
-      developer.log('Error loading user data: $e', name: 'UserProvider');
+    } catch (e, s) {
+      developer.log('Error loading user data: $e', name: 'UserProvider', stackTrace: s);
     }
   }
 

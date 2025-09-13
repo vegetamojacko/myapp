@@ -1,7 +1,8 @@
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart'; // Import the intl package
 import 'package:provider/provider.dart';
 
 import '../blocs/claims/claims_bloc.dart';
@@ -40,6 +41,11 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  String _formatTimestamp(Timestamp? timestamp) {
+    if (timestamp == null) return 'N/A';
+    return DateFormat.yMMMd().format(timestamp.toDate());
+  }
+
   Widget _buildWelcomeBanner(BuildContext context) {
     return Consumer<UserProvider>(
       builder: (context, userProvider, child) {
@@ -74,7 +80,7 @@ class HomeScreen extends StatelessWidget {
               if (plan != null) ...[
                 if (bankingProvider.bankingInfo == null)
                   Text(
-                    'Joined: ${plan['dateJoined'].toString()}',
+                    'Joined: ${_formatTimestamp(plan['dateJoined'])}',
                     style: Theme.of(context)
                         .textTheme
                         .bodyLarge!
@@ -95,8 +101,8 @@ class HomeScreen extends StatelessWidget {
                       Row(
                         children: [
                           Expanded(
-                            child: _buildInfoColumn(
-                                context, 'Joined', plan['dateJoined'].toString()),
+                            child: _buildInfoColumn(context, 'Joined',
+                                _formatTimestamp(plan['dateJoined'])),
                           ),
                           Expanded(
                             child: _buildInfoColumn(context, 'Available',
