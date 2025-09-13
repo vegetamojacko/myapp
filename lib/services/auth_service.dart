@@ -25,7 +25,7 @@ class AuthService {
           'name': name,
           'email': email,
           'whatsapp': whatsapp,
-          'createdAt': Timestamp.now(),
+          'createdAt': FieldValue.serverTimestamp(),
         });
         // Successfully created user and saved data
         return user;

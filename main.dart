@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,16 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
-import './app_router.dart';
-import './blocs/claims/claims_bloc.dart';
-import './blocs/claims/claims_event.dart';
-import './firebase_options.dart';
-import './providers/banking_provider.dart';
-import './providers/navigation_provider.dart';
-import './providers/theme_provider.dart';
-import './providers/user_provider.dart';
-import './services/storage_service.dart';
-import './utils/app_themes.dart';
+import 'lib/app_router.dart';
+import 'lib/blocs/claims/claims_bloc.dart';
+import 'lib/blocs/claims/claims_event.dart';
+import 'lib/firebase_options.dart';
+import 'lib/providers/banking_provider.dart';
+import 'lib/providers/navigation_provider.dart';
+import 'lib/providers/theme_provider.dart';
+import 'lib/providers/user_provider.dart';
+import 'lib/services/storage_service.dart';
+import 'lib/utils/app_themes.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -25,16 +24,16 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(App());
+  runApp(const App());
 }
 
 class App extends StatelessWidget {
-  final AppRouter _appRouter = AppRouter(navigatorKey);
-
-  App({super.key});
+  const App({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final AppRouter appRouter = AppRouter(navigatorKey);
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
@@ -45,7 +44,7 @@ class App extends StatelessWidget {
           create: (context) => ClaimsBloc(storageService: StorageService()),
         ),
       ],
-      child: MyApp(appRouter: _appRouter),
+      child: MyApp(appRouter: appRouter),
     );
   }
 }
@@ -67,6 +66,7 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     _authSubscription =
         FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (!mounted) return;
       final claimsBloc = context.read<ClaimsBloc>();
       final userProvider = context.read<UserProvider>();
       final bankingProvider = context.read<BankingProvider>(); // Get BankingProvider

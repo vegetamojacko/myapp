@@ -8,6 +8,7 @@ import 'package:myapp/providers/banking_provider.dart';
 import 'package:myapp/providers/navigation_provider.dart';
 import 'package:myapp/providers/user_provider.dart';
 import 'package:myapp/screens/home_screen.dart';
+import 'package:myapp/services/storage_service.dart';
 
 // A mock GoRouter for testing
 final _mockRouter = GoRouter(
@@ -31,7 +32,9 @@ void main() {
         ],
         child: MultiBlocProvider(
           providers: [
-            BlocProvider(create: (_) => ClaimsBloc()),
+            BlocProvider(
+              create: (_) => ClaimsBloc(storageService: StorageService()),
+            ),
           ],
           child: MaterialApp.router(
             routerConfig: _mockRouter,

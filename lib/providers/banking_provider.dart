@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
 
@@ -23,7 +23,7 @@ class BankingInfo {
         'branchCode': branchCode,
       };
 
-  factory BankingInfo.fromJson(Map<String, dynamic> json) => BankingInfo(
+  factory BankingInfo.fromJson(Map<dynamic, dynamic> json) => BankingInfo(
         bankName: json['bankName'] ?? '',
         accountNumber: json['accountNumber'] ?? '',
         accountHolder: json['accountHolder'] ?? '',
@@ -32,7 +32,7 @@ class BankingInfo {
 }
 
 class BankingProvider with ChangeNotifier {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseDatabase _database = FirebaseDatabase.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   BankingInfo? _bankingInfo;
@@ -42,19 +42,20 @@ class BankingProvider with ChangeNotifier {
   Future<void> updateBankingInfo(BankingInfo? bankingInfo) async {
     _bankingInfo = bankingInfo;
     notifyListeners();
-    await _saveBankingInfoToFirestore();
+    await _saveBankingInfoToDatabase();
   }
 
   Future<void> loadBankingInfo(User user) async {
     try {
-      final doc = await _firestore.collection('users').doc(user.uid).get();
-      if (doc.exists && doc.data()!.containsKey('bankingInfo')) {
-        final data = doc.data()!['bankingInfo'];
+      final snapshot = await _database.ref('users/${user.uid}/bankingInfo').get();
+      if (snapshot.exists) {
+        final data = snapshot.value as Map<dynamic, dynamic>;
         _bankingInfo = BankingInfo.fromJson(data);
         notifyListeners();
       }
     } catch (e, s) {
-      developer.log('Error loading banking info: $e', name: 'BankingProvider', stackTrace: s);
+      developer.log('Error loading banking info: $e',
+          name: 'BankingProvider', stackTrace: s);
     }
   }
 
@@ -70,13 +71,13 @@ class BankingProvider with ChangeNotifier {
     User? currentUser = _auth.currentUser;
     if (currentUser != null) {
       try {
-        await _firestore.collection('users').doc(currentUser.uid).update({
-          'bankingInfo': FieldValue.delete(),
-        });
-        developer.log('Deleted banking info from Firestore for UID: ${currentUser.uid}', name: 'BankingProvider');
+        await _database.ref('users/${currentUser.uid}/bankingInfo').remove();
+        developer.log(
+            'Deleted banking info from Realtime Database for UID: ${currentUser.uid}',
+            name: 'BankingProvider');
       } catch (e, s) {
         developer.log(
-          'Error deleting banking info from Firestore for UID: ${currentUser.uid}',
+          'Error deleting banking info from Realtime Database for UID: ${currentUser.uid}',
           name: 'BankingProvider',
           error: e,
           stackTrace: s,
@@ -85,20 +86,19 @@ class BankingProvider with ChangeNotifier {
     }
   }
 
-  Future<void> _saveBankingInfoToFirestore() async {
+  Future<void> _saveBankingInfoToDatabase() async {
     User? currentUser = _auth.currentUser;
     if (currentUser != null && _bankingInfo != null) {
       try {
-        await _firestore.collection('users').doc(currentUser.uid).set(
-          {
-            'bankingInfo': _bankingInfo!.toJson(),
-          },
-          SetOptions(merge: true),
-        );
-        developer.log('Saved banking info to Firestore for UID: ${currentUser.uid}', name: 'BankingProvider');
+        await _database
+            .ref('users/${currentUser.uid}/bankingInfo')
+            .set(_bankingInfo!.toJson());
+        developer.log(
+            'Saved banking info to Realtime Database for UID: ${currentUser.uid}',
+            name: 'BankingProvider');
       } catch (e, s) {
         developer.log(
-          'Error saving banking info to Firestore for UID: ${currentUser.uid}',
+          'Error saving banking info to Realtime Database for UID: ${currentUser.uid}',
           name: 'BankingProvider',
           error: e,
           stackTrace: s,

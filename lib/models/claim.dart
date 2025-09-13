@@ -11,6 +11,7 @@ class Claim extends Equatable {
   final DateTime? eventDate;
   final double? ticketCost;
   final int? numTickets;
+  final String? deliveryAddress;
 
   // Car Wash specific fields
   final String? washType;
@@ -28,6 +29,7 @@ class Claim extends Equatable {
     this.eventDate,
     this.ticketCost,
     this.numTickets,
+    this.deliveryAddress,
     this.washType,
     this.vehicleReg,
     this.washDate,
@@ -44,6 +46,7 @@ class Claim extends Equatable {
         eventDate,
         ticketCost,
         numTickets,
+        deliveryAddress,
         washType,
         vehicleReg,
         washDate,
@@ -59,6 +62,7 @@ class Claim extends Equatable {
     DateTime? eventDate,
     double? ticketCost,
     int? numTickets,
+    String? deliveryAddress,
     String? washType,
     String? vehicleReg,
     DateTime? washDate,
@@ -73,6 +77,7 @@ class Claim extends Equatable {
       eventDate: eventDate ?? this.eventDate,
       ticketCost: ticketCost ?? this.ticketCost,
       numTickets: numTickets ?? this.numTickets,
+      deliveryAddress: deliveryAddress ?? this.deliveryAddress,
       washType: washType ?? this.washType,
       vehicleReg: vehicleReg ?? this.vehicleReg,
       washDate: washDate ?? this.washDate,
@@ -80,7 +85,7 @@ class Claim extends Equatable {
     );
   }
 
-  factory Claim.fromJson(Map<String, dynamic> json) {
+  factory Claim.fromJson(Map<dynamic, dynamic> json) {
     return Claim(
       id: json['id'] as String,
       totalAmount: (json['totalAmount'] as num).toDouble(),
@@ -92,6 +97,7 @@ class Claim extends Equatable {
           : null,
       ticketCost: (json['ticketCost'] as num?)?.toDouble(),
       numTickets: json['numTickets'] as int?,
+      deliveryAddress: json['deliveryAddress'] as String?,
       washType: json['washType'] as String?,
       vehicleReg: json['vehicleReg'] as String?,
       washDate: json['washDate'] != null
@@ -111,6 +117,7 @@ class Claim extends Equatable {
       'eventDate': eventDate?.toIso8601String(),
       'ticketCost': ticketCost,
       'numTickets': numTickets,
+      'deliveryAddress': deliveryAddress,
       'washType': washType,
       'vehicleReg': vehicleReg,
       'washDate': washDate?.toIso8601String(),

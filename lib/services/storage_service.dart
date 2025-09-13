@@ -1,30 +1,36 @@
-import 'dart:convert';
-
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 import '../models/claim.dart';
 
 class StorageService {
-  static const _claimsKey = 'claims';
+  final FirebaseDatabase _database = FirebaseDatabase.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<void> saveClaims(List<Claim> claims) async {
-    final prefs = await SharedPreferences.getInstance();
-    final claimsJson = claims.map((claim) => claim.toJson()).toList();
-    await prefs.setString(_claimsKey, json.encode(claimsJson));
+    User? currentUser = _auth.currentUser;
+    if (currentUser != null) {
+      final claimsJson = claims.map((claim) => claim.toJson()).toList();
+      await _database.ref('users/${currentUser.uid}/claims').set(claimsJson);
+    }
   }
 
   Future<List<Claim>> loadClaims() async {
-    final prefs = await SharedPreferences.getInstance();
-    final claimsString = prefs.getString(_claimsKey);
-    if (claimsString != null) {
-      final List<dynamic> claimsJson = json.decode(claimsString);
-      return claimsJson.map((json) => Claim.fromJson(json)).toList();
+    User? currentUser = _auth.currentUser;
+    if (currentUser != null) {
+      final snapshot = await _database.ref('users/${currentUser.uid}/claims').get();
+      if (snapshot.exists) {
+        final List<dynamic> claimsJson = snapshot.value as List<dynamic>;
+        return claimsJson.map((json) => Claim.fromJson(json)).toList();
+      }
     }
     return [];
   }
 
   Future<void> clearClaims() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_claimsKey);
+    User? currentUser = _auth.currentUser;
+    if (currentUser != null) {
+      await _database.ref('users/${currentUser.uid}/claims').remove();
+    }
   }
 }

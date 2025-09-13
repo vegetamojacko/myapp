@@ -21,6 +21,7 @@ class _EventClaimFormState extends State<EventClaimForm> {
   late TextEditingController _eventNameController;
   late TextEditingController _ticketCostController;
   late TextEditingController _numTicketsController;
+  late TextEditingController _deliveryAddressController;
   late DateTime _selectedDate;
 
   @override
@@ -31,6 +32,7 @@ class _EventClaimFormState extends State<EventClaimForm> {
         TextEditingController(text: widget.claim?.ticketCost?.toString());
     _numTicketsController =
         TextEditingController(text: widget.claim?.numTickets?.toString());
+    _deliveryAddressController = TextEditingController(text: widget.claim?.deliveryAddress);
     _selectedDate = widget.claim?.eventDate ?? DateTime.now();
   }
 
@@ -39,6 +41,7 @@ class _EventClaimFormState extends State<EventClaimForm> {
     _eventNameController.dispose();
     _ticketCostController.dispose();
     _numTicketsController.dispose();
+    _deliveryAddressController.dispose();
     super.dispose();
   }
 
@@ -68,6 +71,7 @@ class _EventClaimFormState extends State<EventClaimForm> {
           eventDate: _selectedDate,
           ticketCost: ticketCost,
           numTickets: numTickets,
+          deliveryAddress: _deliveryAddressController.text,
           totalAmount: ticketCost * numTickets,
         );
         context.read<ClaimsBloc>().add(UpdateClaim(updatedClaim));
@@ -87,6 +91,7 @@ class _EventClaimFormState extends State<EventClaimForm> {
           status: 'Pending',
           isCarWashClaim: false,
           numTickets: numTickets,
+          deliveryAddress: _deliveryAddressController.text,
           submittedDate: DateTime.now().toIso8601String(),
         );
         context.read<ClaimsBloc>().add(AddClaim(newClaim));
@@ -190,6 +195,21 @@ class _EventClaimFormState extends State<EventClaimForm> {
                   }
                    if (int.tryParse(value) == null) {
                     return 'Please enter a valid number';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _deliveryAddressController,
+                decoration: const InputDecoration(
+                  labelText: 'Delivery Address',
+                  hintText: 'e.g. 123 test street, dlamini, 1818',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the delivery address';
                   }
                   return null;
                 },

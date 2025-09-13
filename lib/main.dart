@@ -60,24 +60,29 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late StreamSubscription<User?> _authSubscription;
+  late final ClaimsBloc _claimsBloc;
+  late final UserProvider _userProvider;
+  late final BankingProvider _bankingProvider;
+
 
   @override
   void initState() {
     super.initState();
+    // Grab the providers before the async gap.
+    _claimsBloc = context.read<ClaimsBloc>();
+    _userProvider = context.read<UserProvider>();
+    _bankingProvider = context.read<BankingProvider>();
+
     _authSubscription =
         FirebaseAuth.instance.authStateChanges().listen((user) {
-      final claimsBloc = context.read<ClaimsBloc>();
-      final userProvider = context.read<UserProvider>();
-      final bankingProvider = context.read<BankingProvider>(); // Get BankingProvider
-
       if (user != null) {
-        userProvider.loadUserData(user);
-        bankingProvider.loadBankingInfo(user); // FIX: Load banking info on auth change
-        claimsBloc.add(LoadClaims());
+        _userProvider.loadUserData(user);
+        _bankingProvider.loadBankingInfo(user);
+        _claimsBloc.add(LoadClaims());
       } else {
-        userProvider.clearUserData();
-        bankingProvider.clearBankingInfo(); // FIX: Clear banking info on logout
-        claimsBloc.add(LoadClaims()); // Or an event that clears the claims
+        _userProvider.clearUserData();
+        _bankingProvider.clearBankingInfo();
+        _claimsBloc.add(LoadClaims()); // Or an event that clears the claims
       }
     });
   }

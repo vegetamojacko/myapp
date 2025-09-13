@@ -97,10 +97,15 @@ class _BankingDetailsScreenState extends State<BankingDetailsScreen> {
                         accountHolder: _accountHolderController.text,
                         branchCode: _branchCodeController.text,
                       );
+                      final router = GoRouter.of(context);
                       context
                           .read<BankingProvider>()
-                          .updateBankingInfo(bankingInfo);
-                      context.go('/home');
+                          .updateBankingInfo(bankingInfo)
+                          .then((_) {
+                        if (mounted) {
+                          router.go('/home');
+                        }
+                      });
                     }
                   },
                   child: const Text('Save Banking Details'),

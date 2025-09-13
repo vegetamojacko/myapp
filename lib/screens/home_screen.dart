@@ -41,9 +41,17 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  String _formatTimestamp(Timestamp? timestamp) {
+  String _formatTimestamp(dynamic timestamp) {
     if (timestamp == null) return 'N/A';
-    return DateFormat.yMMMd().format(timestamp.toDate());
+
+    if (timestamp is Timestamp) {
+      return DateFormat.yMMMd().format(timestamp.toDate());
+    } else if (timestamp is int) {
+      return DateFormat.yMMMd()
+          .format(DateTime.fromMillisecondsSinceEpoch(timestamp));
+    }
+
+    return 'N/A';
   }
 
   Widget _buildWelcomeBanner(BuildContext context) {
@@ -101,8 +109,11 @@ class HomeScreen extends StatelessWidget {
                       Row(
                         children: [
                           Expanded(
-                            child: _buildInfoColumn(context, 'Joined',
-                                _formatTimestamp(plan['dateJoined'])),
+                            child: _buildInfoColumn(
+                                context,
+                                'Joined',
+                                _formatTimestamp(plan['dateJoined'] ?? 0.0) ??
+                                    'N/A'),
                           ),
                           Expanded(
                             child: _buildInfoColumn(context, 'Available',
@@ -148,7 +159,7 @@ class HomeScreen extends StatelessWidget {
           style: Theme.of(context)
               .textTheme
               .bodyLarge!
-              .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+              .copyWith(fontWeight: FontWeight.bold),
           softWrap: true, // Ensure text wraps
         ),
       ],

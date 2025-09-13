@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';
@@ -28,12 +29,15 @@ class SubscriptionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
     final currentPlan = userProvider.selectedPlan;
+    final isNewUser = currentPlan == null;
     final isCurrentPlan = currentPlan != null && currentPlan['name'] == title;
     final planPriceNumber = _parsePrice(price);
     final currentPriceNumber = currentPlan != null ? (currentPlan['price'] ?? 0.0) as double : 0.0;
 
     String buttonText;
-    if (isCurrentPlan) {
+    if (isNewUser) {
+      buttonText = 'Select Plan';
+    } else if (isCurrentPlan) {
       buttonText = 'Current Plan';
     } else if (planPriceNumber > currentPriceNumber) {
       buttonText = 'Upgrade';
@@ -112,8 +116,12 @@ class SubscriptionCard extends StatelessWidget {
                                       .updateSubscription(title, price);
 
                                   Navigator.of(context).pop();
-                                  navigatorKey.currentState
-                                      ?.popUntil((route) => route.isFirst);
+                                  if (isNewUser) {
+                                    context.go('/banking-details');
+                                  } else {
+                                    navigatorKey.currentState
+                                        ?.popUntil((route) => route.isFirst);
+                                  }
                                 },
                                 child: const Text('Confirm'),
                               ),
