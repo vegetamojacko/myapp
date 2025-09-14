@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -35,9 +36,27 @@ class BankingProvider with ChangeNotifier {
   final FirebaseDatabase _database = FirebaseDatabase.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  StreamSubscription? _bankingInfoSubscription;
   BankingInfo? _bankingInfo;
 
   BankingInfo? get bankingInfo => _bankingInfo;
+
+  void listenToBankingInfo(User user) {
+    _bankingInfoSubscription?.cancel();
+    _bankingInfoSubscription =
+        _database.ref('users/${user.uid}/bankingInfo').onValue.listen((event) {
+      if (event.snapshot.exists) {
+        final data = event.snapshot.value as Map<dynamic, dynamic>;
+        _bankingInfo = BankingInfo.fromJson(data);
+      } else {
+        _bankingInfo = null;
+      }
+      notifyListeners();
+    }, onError: (e, s) {
+      developer.log('Error listening to banking info: $e',
+          name: 'BankingProvider', stackTrace: s);
+    });
+  }
 
   Future<void> updateBankingInfo(BankingInfo? bankingInfo) async {
     _bankingInfo = bankingInfo;
@@ -45,21 +64,8 @@ class BankingProvider with ChangeNotifier {
     await _saveBankingInfoToDatabase();
   }
 
-  Future<void> loadBankingInfo(User user) async {
-    try {
-      final snapshot = await _database.ref('users/${user.uid}/bankingInfo').get();
-      if (snapshot.exists) {
-        final data = snapshot.value as Map<dynamic, dynamic>;
-        _bankingInfo = BankingInfo.fromJson(data);
-        notifyListeners();
-      }
-    } catch (e, s) {
-      developer.log('Error loading banking info: $e',
-          name: 'BankingProvider', stackTrace: s);
-    }
-  }
-
   void clearBankingInfo() {
+    _bankingInfoSubscription?.cancel();
     _bankingInfo = null;
     notifyListeners();
   }
@@ -105,5 +111,11 @@ class BankingProvider with ChangeNotifier {
         );
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _bankingInfoSubscription?.cancel();
+    super.dispose();
   }
 }
