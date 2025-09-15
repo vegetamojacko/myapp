@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart'; // Import the intl package
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../blocs/claims/claims_bloc.dart';
@@ -60,84 +60,101 @@ class HomeScreen extends StatelessWidget {
         final bankingProvider = Provider.of<BankingProvider>(context);
         final plan = userProvider.selectedPlan;
 
-        return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(24.0),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Theme.of(context).colorScheme.primary,
-                Theme.of(context).colorScheme.primary.withAlpha(200),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(16.0),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Welcome Back, ${userProvider.name}!',
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall!
-                    .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+        return BlocBuilder<ClaimsBloc, ClaimsState>(
+          builder: (context, state) {
+            double approvedClaimsTotal = 0.0;
+            if (state is ClaimsLoaded) {
+              approvedClaimsTotal = state.claims
+                  .where((claim) => claim.status == 'Approved')
+                  .fold(0.0, (sum, claim) => sum + claim.totalAmount);
+            }
+
+            final availableAmount =
+                (plan?['amountAvailable'] ?? 0.0) - approvedClaimsTotal;
+
+            return Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24.0),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.primary.withAlpha(200),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16.0),
               ),
-              const SizedBox(height: 8),
-              if (plan != null) ...[
-                if (bankingProvider.bankingInfo == null)
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    'Joined: ${_formatTimestamp(plan['dateJoined'])}',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyLarge!
-                        .copyWith(color: Colors.white70),
-                  )
-                else
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    'Welcome Back, ${userProvider.name}!',
+                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  if (plan != null) ...[
+                    if (bankingProvider.bankingInfo == null)
                       Text(
-                        'Current Plan: ${plan['name']}',
+                        'Joined: ${_formatTimestamp(plan['dateJoined'])}',
                         style: Theme.of(context)
                             .textTheme
                             .bodyLarge!
                             .copyWith(color: Colors.white70),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
+                      )
+                    else
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: _buildInfoColumn(
-                                context,
-                                'Joined',
-                                _formatTimestamp(plan['dateJoined'] ?? 0.0) ??
-                                    'N/A'),
+                          Text(
+                            'Current Plan: ${plan['name']}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyLarge!
+                                .copyWith(color: Colors.white70),
                           ),
-                          Expanded(
-                            child: _buildInfoColumn(context, 'Available',
-                                'R${(plan['amountAvailable'] ?? 0.0).toStringAsFixed(2)}'),
-                          ),
-                          Expanded(
-                            child: _buildInfoColumn(context, 'Used',
-                                'R${(plan['amountUsed'] ?? 0.0).toStringAsFixed(2)}'),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildInfoColumn(
+                                    context,
+                                    'Joined',
+                                    _formatTimestamp(
+                                            plan['dateJoined'] ?? 0.0) ??
+                                        'N/A'),
+                              ),
+                              Expanded(
+                                child: _buildInfoColumn(
+                                    context,
+                                    'Available',
+                                    'R${availableAmount.toStringAsFixed(2)}'),
+                              ),
+                              Expanded(
+                                child: _buildInfoColumn(
+                                    context,
+                                    'Used',
+                                    'R${approvedClaimsTotal.toStringAsFixed(2)}'),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
-              ] else ...[
-                Text(
-                  'No active plan.',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyLarge!
-                      .copyWith(color: Colors.white70),
-                )
-              ]
-            ],
-          ),
+                  ] else ...[
+                    Text(
+                      'No active plan.',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge!
+                          .copyWith(color: Colors.white70),
+                    )
+                  ]
+                ],
+              ),
+            );
+          },
         );
       },
     );
@@ -276,7 +293,8 @@ class HomeScreen extends StatelessWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: recentClaims.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 12),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final claim = recentClaims[index];
                     return _buildRecentClaimItem(context, claim);
