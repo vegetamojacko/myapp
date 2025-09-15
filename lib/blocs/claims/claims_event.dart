@@ -39,5 +39,3 @@ class DeleteClaim extends ClaimsEvent {
 }
 
 class ClearClaims extends ClaimsEvent {}
-
-class ResetClaims extends ClaimsEvent {}

@@ -20,10 +20,8 @@ class ClaimsBloc extends Bloc<ClaimsEvent, ClaimsState> {
   }
 
   void _onLoadClaims(LoadClaims event, Emitter<ClaimsState> emit) async {
-    if (state is! ClaimsLoaded) {
-      final claims = await _storageService.loadClaims();
-      emit(ClaimsLoaded(claims));
-    }
+    final claims = await _storageService.loadClaims();
+    emit(ClaimsLoaded(claims));
   }
 
   void _onAddClaim(AddClaim event, Emitter<ClaimsState> emit) async {

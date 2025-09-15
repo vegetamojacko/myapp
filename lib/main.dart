@@ -78,7 +78,7 @@ class _MyAppState extends State<MyApp> {
       } else {
         _userProvider.clearUserData();
         _bankingProvider.clearBankingInfo();
-        _claimsBloc.add(ResetClaims());
+        _claimsBloc.add(ClearClaims());
       }
     });
   }

@@ -16,16 +16,20 @@ class StorageService {
   }
 
   Future<List<Claim>> loadClaims() async {
-    User? currentUser = _auth.currentUser;
-    if (currentUser != null) {
-      final snapshot = await _database.ref('users/${currentUser.uid}/claims').get();
-      if (snapshot.exists) {
-        final List<dynamic> claimsJson = snapshot.value as List<dynamic>;
-        return claimsJson.map((json) => Claim.fromJson(json)).toList();
-      }
+  User? currentUser = _auth.currentUser;
+  if (currentUser != null) {
+    final snapshot = await _database.ref('users/${currentUser.uid}/claims').get();
+    if (snapshot.exists) {
+      final List<dynamic> claimsJson = snapshot.value as List<dynamic>;
+      return claimsJson
+          .where((json) => json != null) // Filter out null entries
+          .map((json) => Claim.fromJson(json as Map<dynamic, dynamic>))
+          .toList();
     }
-    return [];
   }
+  return [];
+}
+
 
   Future<void> clearClaims() async {
     User? currentUser = _auth.currentUser;

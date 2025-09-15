@@ -88,7 +88,7 @@ class Claim extends Equatable {
   factory Claim.fromJson(Map<dynamic, dynamic> json) {
     return Claim(
       id: json['id'] as String,
-      totalAmount: (json['totalAmount'] as num).toDouble(),
+      totalAmount: double.tryParse(json['totalAmount'].toString()) ?? 0.0,
       submittedDate: json['submittedDate'] as String,
       status: json['status'] as String? ?? 'Pending',
       eventName: json['eventName'] as String?,
@@ -96,7 +96,7 @@ class Claim extends Equatable {
           ? DateTime.parse(json['eventDate'] as String)
           : null,
       ticketCost: (json['ticketCost'] as num?)?.toDouble(),
-      numTickets: json['numTickets'] as int?,
+      numTickets: (json['numTickets'] as num?)?.toInt(),
       deliveryAddress: json['deliveryAddress'] as String?,
       washType: json['washType'] as String?,
       vehicleReg: json['vehicleReg'] as String?,
