@@ -24,11 +24,13 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const App());
+  runApp(App());
 }
 
 class App extends StatelessWidget {
-  const App({super.key});
+  final AppRouter _appRouter = AppRouter(navigatorKey);
+
+  App({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -42,29 +44,31 @@ class App extends StatelessWidget {
           create: (context) => ClaimsBloc(storageService: StorageService()),
         ),
       ],
-      child: const MyApp(),
+      child: MyApp(appRouter: _appRouter),
     );
   }
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  final AppRouter appRouter;
+
+  const MyApp({super.key, required this.appRouter});
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  late final AppRouter _appRouter;
   late StreamSubscription<User?> _authSubscription;
   late final ClaimsBloc _claimsBloc;
   late final UserProvider _userProvider;
   late final BankingProvider _bankingProvider;
 
+
   @override
   void initState() {
     super.initState();
-    _appRouter = AppRouter(navigatorKey);
+    // Grab the providers before the async gap.
     _claimsBloc = context.read<ClaimsBloc>();
     _userProvider = context.read<UserProvider>();
     _bankingProvider = context.read<BankingProvider>();
@@ -72,13 +76,13 @@ class _MyAppState extends State<MyApp> {
     _authSubscription =
         FirebaseAuth.instance.authStateChanges().listen((user) {
       if (user != null) {
-        _userProvider.listenToUserData(user);
-        _bankingProvider.listenToBankingInfo(user);
+        _userProvider.loadUserData(user);
+        _bankingProvider.loadBankingInfo(user);
         _claimsBloc.add(LoadClaims());
       } else {
         _userProvider.clearUserData();
         _bankingProvider.clearBankingInfo();
-        _claimsBloc.add(ResetClaims());
+        _claimsBloc.add(LoadClaims()); // Or an event that clears the claims
       }
     });
   }
@@ -94,7 +98,7 @@ class _MyAppState extends State<MyApp> {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp.router(
-          routerConfig: _appRouter.router,
+          routerConfig: widget.appRouter.router,
           title: 'Claims App',
           theme: AppThemes.lightTheme,
           darkTheme: AppThemes.darkTheme,

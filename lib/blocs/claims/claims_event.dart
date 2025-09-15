@@ -1,3 +1,4 @@
+
 import 'package:equatable/equatable.dart';
 
 import '../../models/claim.dart';
@@ -39,5 +40,3 @@ class DeleteClaim extends ClaimsEvent {
 }
 
 class ClearClaims extends ClaimsEvent {}
-
-class ResetClaims extends ClaimsEvent {}

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -7,8 +6,6 @@ import 'dart:developer' as developer;
 class UserProvider with ChangeNotifier {
   final FirebaseDatabase _database = FirebaseDatabase.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  StreamSubscription? _userSubscription;
 
   String _name = '';
   String _email = '';
@@ -19,47 +16,6 @@ class UserProvider with ChangeNotifier {
   String get email => _email;
   String get contactNumber => _contactNumber;
   Map<String, dynamic>? get selectedPlan => _selectedPlan;
-
-  void listenToUserData(User user) {
-    _userSubscription?.cancel();
-    _userSubscription = _database.ref('users/${user.uid}').onValue.listen(
-      (event) {
-        if (event.snapshot.exists) {
-          final data = event.snapshot.value as Map<dynamic, dynamic>;
-          _name = data['name'] ?? '';
-          _email = data['email'] ?? '';
-          _contactNumber = data['whatsapp'] ?? '';
-
-          if (data['selectedPlan'] != null) {
-            final plan = data['selectedPlan'] as Map<dynamic, dynamic>;
-            _selectedPlan = {
-              'name': plan['name'],
-              'price': (plan['price'] as num?)?.toDouble() ?? 0.0,
-              'dateJoined': plan['dateJoined'],
-              'amountAvailable':
-                  (plan['amountAvailable'] as num?)?.toDouble() ?? 0.0,
-              'amountUsed': (plan['amountUsed'] as num?)?.toDouble() ?? 0.0,
-            };
-          } else {
-            _selectedPlan = null;
-          }
-          notifyListeners();
-        }
-      },
-      onError: (e, s) {
-        developer.log('Error listening to user data: $e', name: 'UserProvider', stackTrace: s);
-      },
-    );
-  }
-
-  void clearUserData() {
-    _userSubscription?.cancel();
-    _name = '';
-    _email = '';
-    _contactNumber = '';
-    _selectedPlan = null;
-    notifyListeners();
-  }
 
   void updateUser(
       {required String name, required String email, required String contactNumber}) {
@@ -86,6 +42,44 @@ class UserProvider with ChangeNotifier {
     };
     notifyListeners();
     _updatePlanInDatabase();
+  }
+
+  Future<void> loadUserData(User user) async {
+    try {
+      final snapshot = await _database.ref('users/${user.uid}').get();
+      if (snapshot.exists) {
+        final data = snapshot.value as Map<dynamic, dynamic>;
+        _name = data['name'] ?? '';
+        _email = data['email'] ?? '';
+        _contactNumber = data['whatsapp'] ?? '';
+
+        if (data['selectedPlan'] != null) {
+          final plan = data['selectedPlan'] as Map<dynamic, dynamic>;
+          _selectedPlan = {
+            'name': plan['name'],
+            'price': (plan['price'] as num?)?.toDouble() ?? 0.0,
+            'dateJoined': plan['dateJoined'],
+            'amountAvailable':
+                (plan['amountAvailable'] as num?)?.toDouble() ?? 0.0,
+            'amountUsed': (plan['amountUsed'] as num?)?.toDouble() ?? 0.0,
+          };
+        } else {
+          _selectedPlan = null;
+        }
+
+        notifyListeners();
+      }
+    } catch (e, s) {
+      developer.log('Error loading user data: $e', name: 'UserProvider', stackTrace: s);
+    }
+  }
+
+  void clearUserData() {
+    _name = '';
+    _email = '';
+    _contactNumber = '';
+    _selectedPlan = null;
+    notifyListeners();
   }
 
   Future<void> _updateUserInDatabase() async {
@@ -126,11 +120,5 @@ class UserProvider with ChangeNotifier {
         );
       }
     }
-  }
-
-  @override
-  void dispose() {
-    _userSubscription?.cancel();
-    super.dispose();
   }
 }
