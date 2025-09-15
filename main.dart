@@ -11,6 +11,7 @@ import 'lib/blocs/claims/claims_bloc.dart';
 import 'lib/blocs/claims/claims_event.dart';
 import 'lib/firebase_options.dart';
 import 'lib/providers/banking_provider.dart';
+import 'lib/providers/car_wash_provider.dart';
 import 'lib/providers/navigation_provider.dart';
 import 'lib/providers/theme_provider.dart';
 import 'lib/providers/user_provider.dart';
@@ -40,6 +41,7 @@ class App extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(create: (_) => BankingProvider()),
+        ChangeNotifierProvider(create: (_) => CarWashProvider()),
         BlocProvider(
           create: (context) => ClaimsBloc(storageService: StorageService()),
         ),
@@ -70,10 +72,12 @@ class _MyAppState extends State<MyApp> {
       final claimsBloc = context.read<ClaimsBloc>();
       final userProvider = context.read<UserProvider>();
       final bankingProvider = context.read<BankingProvider>(); // Get BankingProvider
+      final carWashProvider = context.read<CarWashProvider>();
 
       if (user != null) {
         userProvider.loadUserData(user);
         bankingProvider.loadBankingInfo(user); // Load banking info
+        carWashProvider.loadCarWashes();
         claimsBloc.add(LoadClaims());
       } else {
         userProvider.clearUserData();

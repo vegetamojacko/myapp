@@ -20,6 +20,10 @@ class UserProvider with ChangeNotifier {
   String get contactNumber => _contactNumber;
   Map<String, dynamic>? get selectedPlan => _selectedPlan;
 
+  void loadUserData(User user) {
+    listenToUserData(user);
+  }
+
   void listenToUserData(User user) {
     _userSubscription?.cancel();
     _userSubscription = _database.ref('users/${user.uid}').onValue.listen(

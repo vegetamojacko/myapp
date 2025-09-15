@@ -11,6 +11,7 @@ import './blocs/claims/claims_bloc.dart';
 import './blocs/claims/claims_event.dart';
 import './firebase_options.dart';
 import './providers/banking_provider.dart';
+import './providers/car_wash_provider.dart';
 import './providers/navigation_provider.dart';
 import './providers/theme_provider.dart';
 import './providers/user_provider.dart';
@@ -24,6 +25,11 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
+  // Add the initial car wash to the database
+  final carWashProvider = CarWashProvider();
+  await carWashProvider.addCarWash('Disoufeng car wash Meadowlands');
+
   runApp(const App());
 }
 
@@ -38,6 +44,7 @@ class App extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(create: (_) => BankingProvider()),
+        ChangeNotifierProvider(create: (_) => CarWashProvider()),
         BlocProvider(
           create: (context) => ClaimsBloc(storageService: StorageService()),
         ),
@@ -60,6 +67,7 @@ class _MyAppState extends State<MyApp> {
   late final ClaimsBloc _claimsBloc;
   late final UserProvider _userProvider;
   late final BankingProvider _bankingProvider;
+  late final CarWashProvider _carWashProvider;
 
   @override
   void initState() {
@@ -68,6 +76,7 @@ class _MyAppState extends State<MyApp> {
     _claimsBloc = context.read<ClaimsBloc>();
     _userProvider = context.read<UserProvider>();
     _bankingProvider = context.read<BankingProvider>();
+    _carWashProvider = context.read<CarWashProvider>();
 
     _authSubscription =
         FirebaseAuth.instance.authStateChanges().listen((user) {
@@ -75,6 +84,7 @@ class _MyAppState extends State<MyApp> {
         _userProvider.listenToUserData(user);
         _bankingProvider.listenToBankingInfo(user);
         _claimsBloc.add(LoadClaims());
+        _carWashProvider.fetchCarWashes();
       } else {
         _userProvider.clearUserData();
         _bankingProvider.clearBankingInfo();

@@ -41,6 +41,10 @@ class BankingProvider with ChangeNotifier {
 
   BankingInfo? get bankingInfo => _bankingInfo;
 
+  void loadBankingInfo(User user) {
+    listenToBankingInfo(user);
+  }
+
   void listenToBankingInfo(User user) {
     _bankingInfoSubscription?.cancel();
     _bankingInfoSubscription =

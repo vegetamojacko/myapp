@@ -17,6 +17,8 @@ class Claim extends Equatable {
   final String? washType;
   final String? vehicleReg;
   final DateTime? washDate;
+  final String? carWash;
+
 
   final bool isCarWashClaim;
 
@@ -34,6 +36,7 @@ class Claim extends Equatable {
     this.vehicleReg,
     this.washDate,
     this.isCarWashClaim = false,
+    this.carWash,
   });
 
   @override
@@ -51,6 +54,7 @@ class Claim extends Equatable {
         vehicleReg,
         washDate,
         isCarWashClaim,
+        carWash,
       ];
 
   Claim copyWith({
@@ -67,6 +71,7 @@ class Claim extends Equatable {
     String? vehicleReg,
     DateTime? washDate,
     bool? isCarWashClaim,
+    String? carWash,
   }) {
     return Claim(
       id: id ?? this.id,
@@ -82,6 +87,7 @@ class Claim extends Equatable {
       vehicleReg: vehicleReg ?? this.vehicleReg,
       washDate: washDate ?? this.washDate,
       isCarWashClaim: isCarWashClaim ?? this.isCarWashClaim,
+      carWash: carWash ?? this.carWash,
     );
   }
 
@@ -104,6 +110,7 @@ class Claim extends Equatable {
           ? DateTime.parse(json['washDate'] as String)
           : null,
       isCarWashClaim: json['isCarWashClaim'] as bool? ?? false,
+      carWash: json['carWash'] as String?,
     );
   }
 
@@ -122,6 +129,7 @@ class Claim extends Equatable {
       'vehicleReg': vehicleReg,
       'washDate': washDate?.toIso8601String(),
       'isCarWashClaim': isCarWashClaim,
+      'carWash': carWash,
     };
   }
 }

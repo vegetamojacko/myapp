@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../blocs/claims/claims_bloc.dart';
 import '../blocs/claims/claims_event.dart';
 import '../models/claim.dart';
+import '../providers/car_wash_provider.dart';
 
 class CarWashClaimForm extends StatefulWidget {
   final Claim? claim;
@@ -20,6 +21,7 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
   late TextEditingController _carRegController;
   DateTime? _washDate;
   String? _washType;
+  String? _selectedCarWash;
 
   final _washTypes = ['Basic Wash', 'Wash & Wax', 'Full Detail', 'Interior Only'];
 
@@ -29,6 +31,7 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
     _carRegController = TextEditingController(text: widget.claim?.vehicleReg);
     _washDate = widget.claim?.washDate ?? DateTime.now();
     _washType = widget.claim?.washType;
+    _selectedCarWash = widget.claim?.carWash;
   }
 
   void _submitForm() {
@@ -39,6 +42,7 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
           vehicleReg: _carRegController.text,
           washDate: _washDate,
           washType: _washType,
+          carWash: _selectedCarWash,
           totalAmount: _getWashPrice(_washType!),
           status: 'Pending', // Reset status on update
         );
@@ -56,6 +60,7 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
           vehicleReg: _carRegController.text,
           washDate: _washDate,
           washType: _washType,
+          carWash: _selectedCarWash,
           status: 'Pending',
           submittedDate: DateTime.now().toIso8601String(),
           totalAmount: _getWashPrice(_washType!),
@@ -180,6 +185,35 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
                       return 'Please select a wash type';
                     }
                     return null;
+                  },
+                ),
+                 const SizedBox(height: 16),
+                
+                Consumer<CarWashProvider>(
+                  builder: (context, carWashProvider, child) {
+                    return DropdownButtonFormField<String>(
+                      initialValue: _selectedCarWash,
+                      decoration:
+                          _inputDecoration(context, labelText: 'Car Wash'),
+                      hint: const Text('Select a car wash'),
+                      items: carWashProvider.carWashes.map((CarWash carWash) {
+                        return DropdownMenuItem<String>(
+                          value: carWash.name,
+                          child: Text(carWash.name),
+                        );
+                      }).toList(),
+                      onChanged: (newValue) {
+                        setState(() {
+                          _selectedCarWash = newValue;
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null) {
+                          return 'Please select a car wash';
+                        }
+                        return null;
+                      },
+                    );
                   },
                 ),
                 const SizedBox(height: 32),

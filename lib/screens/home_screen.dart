@@ -66,7 +66,7 @@ class HomeScreen extends StatelessWidget {
             if (state is ClaimsLoaded) {
               approvedClaimsTotal = state.claims
                   .where((claim) => claim.status == 'Approved')
-                  .fold(0.0, (sum, claim) => sum + claim.totalAmount);
+                  .fold(0.0, (previousValue, claim) => previousValue + claim.totalAmount);
             }
 
             final availableAmount =
@@ -123,8 +123,8 @@ class HomeScreen extends StatelessWidget {
                                     context,
                                     'Joined',
                                     _formatTimestamp(
-                                            plan['dateJoined'] ?? 0.0) ??
-                                        'N/A'),
+                                            plan['dateJoined'] ?? 0.0)
+                                        ),
                               ),
                               Expanded(
                                 child: _buildInfoColumn(
@@ -176,7 +176,7 @@ class HomeScreen extends StatelessWidget {
           style: Theme.of(context)
               .textTheme
               .bodyLarge!
-              .copyWith(fontWeight: FontWeight.bold),
+              .copyWith(fontWeight: FontWeight.bold, color: Colors.white),
           softWrap: true, // Ensure text wraps
         ),
       ],
