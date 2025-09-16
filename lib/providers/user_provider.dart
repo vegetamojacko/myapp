@@ -31,7 +31,7 @@ class UserProvider with ChangeNotifier {
     return double.tryParse(cleanPrice) ?? 0.0;
   }
 
-  void updateSubscription(String planName, String planPriceString) {
+  void setSubscription(String planName, String planPriceString) {
     final double planPrice = _parsePrice(planPriceString);
     _selectedPlan = {
       'name': planName,
@@ -41,6 +41,10 @@ class UserProvider with ChangeNotifier {
       'amountUsed': 0.0,
     };
     notifyListeners();
+  }
+
+  void updateSubscription(String planName, String planPriceString) {
+    setSubscription(planName, planPriceString);
     _updatePlanInDatabase();
   }
 
