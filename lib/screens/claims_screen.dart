@@ -26,7 +26,16 @@ class ClaimsScreen extends StatelessWidget {
       ),
       body: BlocBuilder<ClaimsBloc, ClaimsState>(
         builder: (context, state) {
-          if (state is ClaimsLoaded) {
+          if (state is ClaimsLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is ClaimsError) {
+            return Center(child: Text('Error: ${state.message}'));
+          } else if (state is ClaimsLoaded) {
+            if (state.claims.isEmpty) {
+              return const Center(
+                child: Text('You have no claims. Add one!'),
+              );
+            }
             final pendingClaims = state.claims
                 .where((claim) => claim.status.toLowerCase() == 'pending')
                 .toList();
@@ -44,10 +53,11 @@ class ClaimsScreen extends StatelessWidget {
                 _buildClaimsList(context, completedClaims, isHistory: true),
               ],
             );
+          } else {
+            return const Center(
+              child: Text('You have no claims.'),
+            );
           }
-          return const Center(
-            child: Text('You have no claims.'),
-          );
         },
       ),
     );

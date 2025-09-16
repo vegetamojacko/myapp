@@ -11,6 +11,8 @@ abstract class ClaimsState extends Equatable {
 
 class ClaimsInitial extends ClaimsState {}
 
+class ClaimsLoading extends ClaimsState {}
+
 class ClaimsLoaded extends ClaimsState {
   final List<Claim> claims;
 
@@ -18,4 +20,13 @@ class ClaimsLoaded extends ClaimsState {
 
   @override
   List<Object> get props => [claims];
+}
+
+class ClaimsError extends ClaimsState {
+  final String message;
+
+  const ClaimsError(this.message);
+
+  @override
+  List<Object> get props => [message];
 }
