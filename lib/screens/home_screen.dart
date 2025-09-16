@@ -67,6 +67,7 @@ class HomeScreen extends StatelessWidget {
           builder: (context, userProvider, child) {
             final bankingProvider = Provider.of<BankingProvider>(context);
             final plan = userProvider.selectedPlan;
+            final availableAmount = (plan?['amountAvailable'] ?? 0.0) - totalUsed;
 
             return Container(
               width: double.infinity,
@@ -125,7 +126,7 @@ class HomeScreen extends StatelessWidget {
                               ),
                               Expanded(
                                 child: _buildInfoColumn(context, 'Available',
-                                    'R${(plan['amountAvailable'] ?? 0.0).toStringAsFixed(2)}'),
+                                    'R${availableAmount.toStringAsFixed(2)}'),
                               ),
                               Expanded(
                                 child: _buildInfoColumn(context, 'Used',
