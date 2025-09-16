@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +11,10 @@ class SubscriptionScreen extends StatelessWidget {
 
   void _selectPlan(BuildContext context, String planName, String planPrice) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final bankingProvider = Provider.of<BankingProvider>(context, listen: false);
+    final bankingProvider = Provider.of<BankingProvider>(
+      context,
+      listen: false,
+    );
 
     if (bankingProvider.bankingInfo != null) {
       userProvider.updateSubscription(planName, planPrice);
@@ -49,8 +51,11 @@ class SubscriptionScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildCarWashSubscription(context, currentPlan,
-                bankingProvider.bankingInfo != null),
+            _buildCarWashSubscription(
+              context,
+              currentPlan,
+              bankingProvider.bankingInfo != null,
+            ),
             const SizedBox(height: 24),
             _buildPricingPlan(
               context,
@@ -116,12 +121,18 @@ class SubscriptionScreen extends StatelessWidget {
   }
 
   Widget _buildCarWashSubscription(
-      BuildContext context, Map<String, dynamic>? currentPlan, bool hasBankingDetails) {
+    BuildContext context,
+    Map<String, dynamic>? currentPlan,
+    bool hasBankingDetails,
+  ) {
     const planName = 'Car Wash';
     const planPrice = 'R100/month';
-    final isCurrentPlan = currentPlan != null && currentPlan['name'] == planName;
+    final isCurrentPlan =
+        currentPlan != null && currentPlan['name'] == planName;
     final planPriceNumber = _parsePrice(planPrice);
-    final currentPriceNumber = currentPlan != null ? (currentPlan['price'] ?? 0.0) as double : 0.0;
+    final currentPriceNumber = currentPlan != null
+        ? (currentPlan['price'] ?? 0.0) as double
+        : 0.0;
 
     String buttonText;
     VoidCallback? onPressed;
@@ -160,7 +171,10 @@ class SubscriptionScreen extends StatelessWidget {
               planPrice,
               textAlign: TextAlign.center,
               style: TextStyle(
-                  fontSize: 36.0, fontWeight: FontWeight.bold, color: Colors.blue),
+                fontSize: 36.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
             ),
             const SizedBox(height: 16.0),
             const Text(
@@ -175,15 +189,18 @@ class SubscriptionScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16.0),
             _buildFeatureRow(
-                'Priority service – your car gets first-class treatment',
-                color: Colors.blue),
+              'Priority service – your car gets first-class treatment',
+              color: Colors.blue,
+            ),
             _buildFeatureRow('Skip the queue', color: Colors.blue),
             _buildFeatureRow(
-                'Eco-friendly products – gentle on your car paint',
-                color: Colors.blue),
+              'Eco-friendly products – gentle on your car paint',
+              color: Colors.blue,
+            ),
             _buildFeatureRow(
-                'VIP treatment while you wait – relax in comfort, we handle the shine',
-                color: Colors.blue),
+              'VIP treatment while you wait – relax in comfort, we handle the shine',
+              color: Colors.blue,
+            ),
             const SizedBox(height: 24.0),
             ElevatedButton(
               onPressed: onPressed,
@@ -192,7 +209,8 @@ class SubscriptionScreen extends StatelessWidget {
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0)),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
               ),
               child: Text(buttonText, style: const TextStyle(fontSize: 18.0)),
             ),
@@ -215,7 +233,9 @@ class SubscriptionScreen extends StatelessWidget {
   }) {
     final isCurrentPlan = currentPlan != null && currentPlan['name'] == title;
     final planPriceNumber = _parsePrice(price);
-    final currentPriceNumber = currentPlan != null ? (currentPlan['price'] ?? 0.0) as double : 0.0;
+    final currentPriceNumber = currentPlan != null
+        ? (currentPlan['price'] ?? 0.0) as double
+        : 0.0;
 
     String buttonText;
     VoidCallback? onPressed;
@@ -247,14 +267,20 @@ class SubscriptionScreen extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 24.0,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 16.0),
             Text(
               price,
               textAlign: TextAlign.center,
               style: TextStyle(
-                  fontSize: 48.0, fontWeight: FontWeight.bold, color: buttonColor),
+                fontSize: 48.0,
+                fontWeight: FontWeight.bold,
+                color: buttonColor,
+              ),
             ),
             const Text(
               'per month',
@@ -268,8 +294,9 @@ class SubscriptionScreen extends StatelessWidget {
               style: const TextStyle(fontSize: 16.0, color: Colors.grey),
             ),
             const SizedBox(height: 24.0),
-            ...features
-                .map((feature) => _buildFeatureRow(feature, color: buttonColor)),
+            ...features.map(
+              (feature) => _buildFeatureRow(feature, color: buttonColor),
+            ),
             const SizedBox(height: 24.0),
             ElevatedButton(
               onPressed: onPressed,
@@ -278,7 +305,8 @@ class SubscriptionScreen extends StatelessWidget {
                 foregroundColor: buttonTextColor,
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0)),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
               ),
               child: Text(buttonText, style: const TextStyle(fontSize: 18.0)),
             ),
@@ -295,7 +323,9 @@ class SubscriptionScreen extends StatelessWidget {
         children: [
           Icon(Icons.check_circle, color: color, size: 24),
           const SizedBox(width: 16),
-          Expanded(child: Text(feature, style: const TextStyle(fontSize: 16.0))),
+          Expanded(
+            child: Text(feature, style: const TextStyle(fontSize: 16.0)),
+          ),
         ],
       ),
     );

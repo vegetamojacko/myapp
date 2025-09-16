@@ -19,8 +19,9 @@ class ClaimItem extends StatelessWidget {
     final currencyFormat = NumberFormat.currency(locale: 'en_ZA', symbol: 'R');
     String submittedDate;
     try {
-      submittedDate =
-          DateFormat.yMMMd().format(DateTime.parse(claim.submittedDate));
+      submittedDate = DateFormat.yMMMd().format(
+        DateTime.parse(claim.submittedDate),
+      );
     } catch (e) {
       submittedDate = 'Invalid Date';
     }
@@ -40,13 +41,19 @@ class ClaimItem extends StatelessWidget {
               Flexible(
                 child: Text(
                   claim.isCarWashClaim ? 'Car Wash Claim' : claim.eventName!,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               Text(
                 currencyFormat.format(claim.totalAmount),
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
               ),
             ],
           ),
@@ -61,13 +68,15 @@ class ClaimItem extends StatelessWidget {
                 Row(
                   children: [
                     TextButton(
-                        onPressed: () => _showEditSheet(context, claim),
-                        child: const Text('Edit')),
+                      onPressed: () => _showEditSheet(context, claim),
+                      child: const Text('Edit'),
+                    ),
                     TextButton(
-                        onPressed: () => context
-                            .read<ClaimsBloc>()
-                            .add(UpdateClaim(claim.copyWith(status: 'Cancelled'))),
-                        child: const Text('Cancel')),
+                      onPressed: () => context.read<ClaimsBloc>().add(
+                        UpdateClaim(claim.copyWith(status: 'Cancelled')),
+                      ),
+                      child: const Text('Cancel'),
+                    ),
                   ],
                 ),
             ],
@@ -91,7 +100,7 @@ class ClaimItem extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            '${claim.washType} for ${claim.vehicleReg}',
+            '${claim.carWashName} - ${claim.washType} for ${claim.vehicleReg}',
             style: TextStyle(color: Colors.grey[600], fontSize: 12),
           ),
         ],

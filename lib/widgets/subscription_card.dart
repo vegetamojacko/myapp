@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -32,7 +31,9 @@ class SubscriptionCard extends StatelessWidget {
     final isNewUser = currentPlan == null;
     final isCurrentPlan = currentPlan != null && currentPlan['name'] == title;
     final planPriceNumber = _parsePrice(price);
-    final currentPriceNumber = currentPlan != null ? (currentPlan['price'] ?? 0.0) as double : 0.0;
+    final currentPriceNumber = currentPlan != null
+        ? (currentPlan['price'] ?? 0.0) as double
+        : 0.0;
 
     String buttonText;
     if (isNewUser) {
@@ -61,17 +62,17 @@ class SubscriptionCard extends StatelessWidget {
             Text(
               title,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
             ),
             const SizedBox(height: 10),
             Text(
               price,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
             ),
             const SizedBox(height: 20),
             ...features.map(
@@ -102,7 +103,8 @@ class SubscriptionCard extends StatelessWidget {
                           return AlertDialog(
                             title: const Text('Confirm Subscription'),
                             content: Text(
-                                'Do you want to subscribe to the $title plan?'),
+                              'Do you want to subscribe to the $title plan?',
+                            ),
                             actions: [
                               TextButton(
                                 onPressed: () {
@@ -112,15 +114,18 @@ class SubscriptionCard extends StatelessWidget {
                               ),
                               TextButton(
                                 onPressed: () {
-                                  Provider.of<UserProvider>(context, listen: false)
-                                      .updateSubscription(title, price);
+                                  Provider.of<UserProvider>(
+                                    context,
+                                    listen: false,
+                                  ).updateSubscription(title, price);
 
                                   Navigator.of(context).pop();
                                   if (isNewUser) {
                                     context.go('/banking-details');
                                   } else {
-                                    navigatorKey.currentState
-                                        ?.popUntil((route) => route.isFirst);
+                                    navigatorKey.currentState?.popUntil(
+                                      (route) => route.isFirst,
+                                    );
                                   }
                                 },
                                 child: const Text('Confirm'),

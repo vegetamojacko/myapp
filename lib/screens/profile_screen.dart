@@ -15,9 +15,7 @@ class ProfileScreen extends StatelessWidget {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-      ),
+      appBar: AppBar(title: const Text('Profile')),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -85,16 +83,21 @@ class ProfileScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            _buildBankingInfoRow('Bank', bankingInfo.bankName),
                             _buildBankingInfoRow(
-                                'Bank', bankingInfo.bankName),
+                              'Account Number',
+                              bankingInfo.accountNumber,
+                            ),
                             _buildBankingInfoRow(
-                                'Account Number', bankingInfo.accountNumber),
-                            _buildBankingInfoRow(
-                                'Account Holder', bankingInfo.accountHolder),
+                              'Account Holder',
+                              bankingInfo.accountHolder,
+                            ),
                             if (bankingInfo.branchCode != null &&
                                 bankingInfo.branchCode!.isNotEmpty)
                               _buildBankingInfoRow(
-                                  'Branch Code', bankingInfo.branchCode!),
+                                'Branch Code',
+                                bankingInfo.branchCode!,
+                              ),
                             const SizedBox(height: 16),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
@@ -149,7 +152,8 @@ class ProfileScreen extends StatelessWidget {
                     children: <Widget>[
                       const SizedBox(height: 24),
                       const Text(
-                          'This is a demo application to showcase Flutter development with Firebase and generative AI.'),
+                        'This is a demo application to showcase Flutter development with Firebase and generative AI.',
+                      ),
                     ],
                   );
                 },

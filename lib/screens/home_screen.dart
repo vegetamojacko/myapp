@@ -19,9 +19,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-      ),
+      appBar: AppBar(title: const Text('Dashboard')),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -46,8 +44,9 @@ class HomeScreen extends StatelessWidget {
     if (timestamp is Timestamp) {
       return DateFormat.yMMMd().format(timestamp.toDate());
     } else if (timestamp is int) {
-      return DateFormat.yMMMd()
-          .format(DateTime.fromMillisecondsSinceEpoch(timestamp));
+      return DateFormat.yMMMd().format(
+        DateTime.fromMillisecondsSinceEpoch(timestamp),
+      );
     }
 
     return 'N/A';
@@ -60,14 +59,15 @@ class HomeScreen extends StatelessWidget {
         if (claimsState is ClaimsLoaded) {
           totalUsed = claimsState.claims
               .where((claim) => claim.status.toLowerCase() == 'approved')
-              .fold(0, (sum, claim) => sum + claim.totalAmount);
+              .fold(0, (previousValue, claim) => previousValue + claim.totalAmount);
         }
 
         return Consumer<UserProvider>(
           builder: (context, userProvider, child) {
             final bankingProvider = Provider.of<BankingProvider>(context);
             final plan = userProvider.selectedPlan;
-            final availableAmount = (plan?['amountAvailable'] ?? 0.0) - totalUsed;
+            final availableAmount =
+                (plan?['amountAvailable'] ?? 0.0) - totalUsed;
 
             return Container(
               width: double.infinity,
@@ -88,20 +88,19 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   Text(
                     'Welcome Back, ${userProvider.name}!',
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineSmall!
-                        .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   if (plan != null) ...[
                     if (bankingProvider.bankingInfo == null)
                       Text(
                         'Joined: ${_formatTimestamp(plan['dateJoined'])}',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge!
-                            .copyWith(color: Colors.white70),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodyLarge!.copyWith(color: Colors.white70),
                       )
                     else
                       Column(
@@ -109,9 +108,7 @@ class HomeScreen extends StatelessWidget {
                         children: [
                           Text(
                             'Current Plan: ${plan['name']}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyLarge!
+                            style: Theme.of(context).textTheme.bodyLarge!
                                 .copyWith(color: Colors.white70),
                           ),
                           const SizedBox(height: 8),
@@ -119,18 +116,24 @@ class HomeScreen extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: _buildInfoColumn(
-                                    context,
-                                    'Joined',
-                                    _formatTimestamp(plan['dateJoined'] ?? 0.0) ??
-                                        'N/A'),
+                                  context,
+                                  'Joined',
+                                  _formatTimestamp(plan['dateJoined'] ?? 0.0),
+                                ),
                               ),
                               Expanded(
-                                child: _buildInfoColumn(context, 'Available',
-                                    'R${availableAmount.toStringAsFixed(2)}'),
+                                child: _buildInfoColumn(
+                                  context,
+                                  'Available',
+                                  'R${availableAmount.toStringAsFixed(2)}',
+                                ),
                               ),
                               Expanded(
-                                child: _buildInfoColumn(context, 'Used',
-                                    'R${totalUsed.toStringAsFixed(2)}'),
+                                child: _buildInfoColumn(
+                                  context,
+                                  'Used',
+                                  'R${totalUsed.toStringAsFixed(2)}',
+                                ),
                               ),
                             ],
                           ),
@@ -139,12 +142,11 @@ class HomeScreen extends StatelessWidget {
                   ] else ...[
                     Text(
                       'No active plan.',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyLarge!
-                          .copyWith(color: Colors.white70),
-                    )
-                  ]
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyLarge!.copyWith(color: Colors.white70),
+                    ),
+                  ],
                 ],
               ),
             );
@@ -160,17 +162,15 @@ class HomeScreen extends StatelessWidget {
       children: [
         Text(
           title,
-          style: Theme.of(context)
-              .textTheme
-              .bodySmall!
-              .copyWith(color: Colors.white70),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall!.copyWith(color: Colors.white70),
         ),
         Text(
           value,
-          style: Theme.of(context)
-              .textTheme
-              .bodyLarge!
-              .copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.bold),
           softWrap: true, // Ensure text wraps
         ),
       ],
@@ -181,17 +181,15 @@ class HomeScreen extends StatelessWidget {
     final userProvider = Provider.of<UserProvider>(context);
     final bankingProvider = Provider.of<BankingProvider>(context);
     final plan = userProvider.selectedPlan;
-    final bool isEligible = plan != null &&
+    final bool isEligible =
+        plan != null &&
         (plan['amountAvailable'] ?? 0.0) >= 100 &&
         bankingProvider.bankingInfo != null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Quick Actions',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+        Text('Quick Actions', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -222,10 +220,12 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionCard(BuildContext context,
-      {required IconData icon,
-      required String label,
-      required VoidCallback? onTap}) {
+  Widget _buildActionCard(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback? onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12.0),
@@ -249,7 +249,11 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 32, color: Theme.of(context).colorScheme.primary),
+              Icon(
+                icon,
+                size: 32,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               const SizedBox(height: 8),
               Text(
                 label,
@@ -267,10 +271,7 @@ class HomeScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Recent Claims',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+        Text('Recent Claims', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 16),
         BlocBuilder<ClaimsBloc, ClaimsState>(
           builder: (context, state) {
@@ -287,7 +288,8 @@ class HomeScreen extends StatelessWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: recentClaims.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 12),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final claim = recentClaims[index];
                     return _buildRecentClaimItem(context, claim);
@@ -346,9 +348,7 @@ class HomeScreen extends StatelessWidget {
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
-            child: SingleChildScrollView(
-              child: CarWashClaimForm(claim: claim),
-            ),
+            child: SingleChildScrollView(child: CarWashClaimForm(claim: claim)),
           ),
         );
       },

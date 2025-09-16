@@ -14,6 +14,7 @@ class Claim extends Equatable {
   final String? deliveryAddress;
 
   // Car Wash specific fields
+  final String? carWashName; // Added this field
   final String? washType;
   final String? vehicleReg;
   final DateTime? washDate;
@@ -30,6 +31,7 @@ class Claim extends Equatable {
     this.ticketCost,
     this.numTickets,
     this.deliveryAddress,
+    this.carWashName, // Added to constructor
     this.washType,
     this.vehicleReg,
     this.washDate,
@@ -47,6 +49,7 @@ class Claim extends Equatable {
         ticketCost,
         numTickets,
         deliveryAddress,
+        carWashName, // Added to props
         washType,
         vehicleReg,
         washDate,
@@ -63,6 +66,7 @@ class Claim extends Equatable {
     double? ticketCost,
     int? numTickets,
     String? deliveryAddress,
+    String? carWashName, // Added to copyWith
     String? washType,
     String? vehicleReg,
     DateTime? washDate,
@@ -78,6 +82,7 @@ class Claim extends Equatable {
       ticketCost: ticketCost ?? this.ticketCost,
       numTickets: numTickets ?? this.numTickets,
       deliveryAddress: deliveryAddress ?? this.deliveryAddress,
+      carWashName: carWashName ?? this.carWashName, // Added to copyWith
       washType: washType ?? this.washType,
       vehicleReg: vehicleReg ?? this.vehicleReg,
       washDate: washDate ?? this.washDate,
@@ -98,6 +103,7 @@ class Claim extends Equatable {
       ticketCost: (json['ticketCost'] as num?)?.toDouble(),
       numTickets: json['numTickets'] as int?,
       deliveryAddress: json['deliveryAddress'] as String?,
+      carWashName: json['carWashName'] as String?, // Added to fromJson
       washType: json['washType'] as String?,
       vehicleReg: json['vehicleReg'] as String?,
       washDate: json['washDate'] != null
@@ -118,6 +124,7 @@ class Claim extends Equatable {
       'ticketCost': ticketCost,
       'numTickets': numTickets,
       'deliveryAddress': deliveryAddress,
+      'carWashName': carWashName, // Added to toJson
       'washType': washType,
       'vehicleReg': vehicleReg,
       'washDate': washDate?.toIso8601String(),

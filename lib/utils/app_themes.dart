@@ -5,11 +5,20 @@ import './app_colors.dart';
 
 class AppThemes {
   static final TextTheme appTextTheme = TextTheme(
-    displayLarge:
-        GoogleFonts.oswald(fontSize: 57, fontWeight: FontWeight.bold, color: AppColors.lightPrimaryText),
-    titleLarge:
-        GoogleFonts.roboto(fontSize: 22, fontWeight: FontWeight.w500, color: AppColors.lightPrimaryText),
-    bodyMedium: GoogleFonts.openSans(fontSize: 14, color: AppColors.lightPrimaryText),
+    displayLarge: GoogleFonts.oswald(
+      fontSize: 57,
+      fontWeight: FontWeight.bold,
+      color: AppColors.lightPrimaryText,
+    ),
+    titleLarge: GoogleFonts.roboto(
+      fontSize: 22,
+      fontWeight: FontWeight.w500,
+      color: AppColors.lightPrimaryText,
+    ),
+    bodyMedium: GoogleFonts.openSans(
+      fontSize: 14,
+      color: AppColors.lightPrimaryText,
+    ),
   );
 
   static final ThemeData lightTheme = ThemeData(
@@ -26,18 +35,21 @@ class AppThemes {
     appBarTheme: AppBarTheme(
       backgroundColor: AppColors.primaryColor,
       foregroundColor: Colors.white,
-      titleTextStyle:
-          GoogleFonts.oswald(fontSize: 24, fontWeight: FontWeight.bold),
+      titleTextStyle: GoogleFonts.oswald(
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+      ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.white,
         backgroundColor: AppColors.primaryColor,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        textStyle:
-            GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.w500),
+        textStyle: GoogleFonts.roboto(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     ),
     cardTheme: const CardThemeData(
@@ -59,22 +71,29 @@ class AppThemes {
       onSurface: AppColors.darkPrimaryText,
       error: AppColors.failedBackground,
     ),
-    textTheme: appTextTheme.apply(bodyColor: AppColors.darkPrimaryText, displayColor: AppColors.darkPrimaryText),
+    textTheme: appTextTheme.apply(
+      bodyColor: AppColors.darkPrimaryText,
+      displayColor: AppColors.darkPrimaryText,
+    ),
     appBarTheme: AppBarTheme(
       backgroundColor: AppColors.darkCard,
       foregroundColor: AppColors.darkPrimaryText,
-      titleTextStyle:
-          GoogleFonts.oswald(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.darkPrimaryText),
+      titleTextStyle: GoogleFonts.oswald(
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+        color: AppColors.darkPrimaryText,
+      ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.white,
         backgroundColor: AppColors.primaryColor,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        textStyle:
-            GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.w500),
+        textStyle: GoogleFonts.roboto(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     ),
     cardTheme: const CardThemeData(

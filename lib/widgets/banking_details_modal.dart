@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -6,7 +5,10 @@ import '../providers/banking_provider.dart';
 import '../providers/navigation_provider.dart';
 
 void showBankingDetailsModal(
-    BuildContext context, String planName, String planPrice) {
+  BuildContext context,
+  String planName,
+  String planPrice,
+) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -97,8 +99,9 @@ class _BankingDetailsFormState extends State<BankingDetailsForm> {
             const SizedBox(height: 24),
             TextFormField(
               controller: _accountHolderController,
-              decoration:
-                  const InputDecoration(labelText: 'Account Holder Name'),
+              decoration: const InputDecoration(
+                labelText: 'Account Holder Name',
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter account holder name';
@@ -140,10 +143,7 @@ class _BankingDetailsFormState extends State<BankingDetailsForm> {
               },
             ),
             const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: _submitForm,
-              child: const Text('Submit'),
-            ),
+            ElevatedButton(onPressed: _submitForm, child: const Text('Submit')),
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text('Cancel'),

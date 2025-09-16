@@ -17,8 +17,11 @@ class UserProvider with ChangeNotifier {
   String get contactNumber => _contactNumber;
   Map<String, dynamic>? get selectedPlan => _selectedPlan;
 
-  void updateUser(
-      {required String name, required String email, required String contactNumber}) {
+  void updateUser({
+    required String name,
+    required String email,
+    required String contactNumber,
+  }) {
     _name = name;
     _email = email;
     _contactNumber = contactNumber;
@@ -33,9 +36,12 @@ class UserProvider with ChangeNotifier {
 
   void setSubscription(String planName, String planPriceString) {
     final double planPrice = _parsePrice(planPriceString);
-    final dynamic dateJoined = _selectedPlan?['dateJoined'] ?? ServerValue.timestamp;
-    final double oldAmountAvailable = (_selectedPlan?['amountAvailable'] as num?)?.toDouble() ?? 0.0;
-    final double oldAmountUsed = (_selectedPlan?['amountUsed'] as num?)?.toDouble() ?? 0.0;
+    final dynamic dateJoined =
+        _selectedPlan?['dateJoined'] ?? ServerValue.timestamp;
+    final double oldAmountAvailable =
+        (_selectedPlan?['amountAvailable'] as num?)?.toDouble() ?? 0.0;
+    final double oldAmountUsed =
+        (_selectedPlan?['amountUsed'] as num?)?.toDouble() ?? 0.0;
 
     // Calculate the remaining balance which becomes the new available amount
     final double newAmountAvailable = oldAmountAvailable - oldAmountUsed;
@@ -81,7 +87,11 @@ class UserProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e, s) {
-      developer.log('Error loading user data: $e', name: 'UserProvider', stackTrace: s);
+      developer.log(
+        'Error loading user data: $e',
+        name: 'UserProvider',
+        stackTrace: s,
+      );
     }
   }
 
@@ -102,7 +112,10 @@ class UserProvider with ChangeNotifier {
           'email': _email,
           'whatsapp': _contactNumber,
         });
-        developer.log('Successfully updated user in Realtime Database for UID: ${currentUser.uid}', name: 'UserProvider');
+        developer.log(
+          'Successfully updated user in Realtime Database for UID: ${currentUser.uid}',
+          name: 'UserProvider',
+        );
       } catch (e, s) {
         developer.log(
           'Error updating user in Realtime Database for UID: ${currentUser.uid}',
@@ -121,7 +134,10 @@ class UserProvider with ChangeNotifier {
         await _database
             .ref('users/${currentUser.uid}/selectedPlan')
             .set(_selectedPlan);
-        developer.log('Successfully updated plan in Realtime Database for UID: ${currentUser.uid}', name: 'UserProvider');
+        developer.log(
+          'Successfully updated plan in Realtime Database for UID: ${currentUser.uid}',
+          name: 'UserProvider',
+        );
       } catch (e, s) {
         developer.log(
           'Error updating plan in Realtime Database for UID: ${currentUser.uid}',

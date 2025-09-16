@@ -28,11 +28,15 @@ class _EventClaimFormState extends State<EventClaimForm> {
   void initState() {
     super.initState();
     _eventNameController = TextEditingController(text: widget.claim?.eventName);
-    _ticketCostController =
-        TextEditingController(text: widget.claim?.ticketCost?.toString());
-    _numTicketsController =
-        TextEditingController(text: widget.claim?.numTickets?.toString());
-    _deliveryAddressController = TextEditingController(text: widget.claim?.deliveryAddress);
+    _ticketCostController = TextEditingController(
+      text: widget.claim?.ticketCost?.toString(),
+    );
+    _numTicketsController = TextEditingController(
+      text: widget.claim?.numTickets?.toString(),
+    );
+    _deliveryAddressController = TextEditingController(
+      text: widget.claim?.deliveryAddress,
+    );
     _selectedDate = widget.claim?.eventDate ?? DateTime.now();
   }
 
@@ -75,12 +79,12 @@ class _EventClaimFormState extends State<EventClaimForm> {
           totalAmount: ticketCost * numTickets,
         );
         context.read<ClaimsBloc>().add(UpdateClaim(updatedClaim));
-         ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Event claim updated successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Event claim updated successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
       } else {
         // Add new claim
         final newClaim = Claim(
@@ -95,12 +99,12 @@ class _EventClaimFormState extends State<EventClaimForm> {
           submittedDate: DateTime.now().toIso8601String(),
         );
         context.read<ClaimsBloc>().add(AddClaim(newClaim));
-         ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Event claim submitted successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Event claim submitted successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
       }
 
       Navigator.of(context).pop();
@@ -126,7 +130,15 @@ class _EventClaimFormState extends State<EventClaimForm> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(widget.claim != null ? 'Edit Event Claim' : 'Claim Event Tickets', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text(
+                    widget.claim != null
+                        ? 'Edit Event Claim'
+                        : 'Claim Event Tickets',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   IconButton(
                     icon: const Icon(Icons.close),
                     onPressed: () => Navigator.of(context).pop(),
@@ -170,7 +182,9 @@ class _EventClaimFormState extends State<EventClaimForm> {
                   border: OutlineInputBorder(),
                   prefixText: 'R ',
                 ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter the ticket cost';
@@ -193,7 +207,7 @@ class _EventClaimFormState extends State<EventClaimForm> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter the number of tickets';
                   }
-                   if (int.tryParse(value) == null) {
+                  if (int.tryParse(value) == null) {
                     return 'Please enter a valid number';
                   }
                   return null;
@@ -217,13 +231,13 @@ class _EventClaimFormState extends State<EventClaimForm> {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _submitForm,
-                 style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 50),
-                    textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),
+                  textStyle: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 child: Text(widget.claim != null ? 'Update' : 'Submit'),
               ),
-               const SizedBox(height: 16),
+              const SizedBox(height: 16),
             ],
           ),
         ),

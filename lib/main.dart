@@ -11,6 +11,7 @@ import './blocs/claims/claims_bloc.dart';
 import './blocs/claims/claims_event.dart';
 import './firebase_options.dart';
 import './providers/banking_provider.dart';
+import './providers/car_wash_provider.dart';
 import './providers/navigation_provider.dart';
 import './providers/theme_provider.dart';
 import './providers/user_provider.dart';
@@ -21,9 +22,7 @@ final navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(App());
 }
 
@@ -40,6 +39,7 @@ class App extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(create: (_) => BankingProvider()),
+        ChangeNotifierProvider(create: (_) => CarWashProvider()),
         BlocProvider(
           create: (context) => ClaimsBloc(storageService: StorageService()),
         ),
@@ -64,7 +64,6 @@ class _MyAppState extends State<MyApp> {
   late final UserProvider _userProvider;
   late final BankingProvider _bankingProvider;
 
-
   @override
   void initState() {
     super.initState();
@@ -73,8 +72,7 @@ class _MyAppState extends State<MyApp> {
     _userProvider = context.read<UserProvider>();
     _bankingProvider = context.read<BankingProvider>();
 
-    _authSubscription =
-        FirebaseAuth.instance.authStateChanges().listen((user) {
+    _authSubscription = FirebaseAuth.instance.authStateChanges().listen((user) {
       if (user != null) {
         _userProvider.loadUserData(user);
         _bankingProvider.loadBankingInfo(user);

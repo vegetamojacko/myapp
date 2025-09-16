@@ -21,15 +21,23 @@ class _BankingDetailsScreenState extends State<BankingDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    final bankingProvider = Provider.of<BankingProvider>(context, listen: false);
+    final bankingProvider = Provider.of<BankingProvider>(
+      context,
+      listen: false,
+    );
     final bankingInfo = bankingProvider.bankingInfo;
-    _bankNameController = TextEditingController(text: bankingInfo?.bankName ?? '');
-    _accountNumberController =
-        TextEditingController(text: bankingInfo?.accountNumber ?? '');
-    _accountHolderController =
-        TextEditingController(text: bankingInfo?.accountHolder ?? '');
-    _branchCodeController =
-        TextEditingController(text: bankingInfo?.branchCode ?? '');
+    _bankNameController = TextEditingController(
+      text: bankingInfo?.bankName ?? '',
+    );
+    _accountNumberController = TextEditingController(
+      text: bankingInfo?.accountNumber ?? '',
+    );
+    _accountHolderController = TextEditingController(
+      text: bankingInfo?.accountHolder ?? '',
+    );
+    _branchCodeController = TextEditingController(
+      text: bankingInfo?.branchCode ?? '',
+    );
   }
 
   @override
@@ -58,7 +66,9 @@ class _BankingDetailsScreenState extends State<BankingDetailsScreen> {
                 ),
                 TextFormField(
                   controller: _accountNumberController,
-                  decoration: const InputDecoration(labelText: 'Account Number'),
+                  decoration: const InputDecoration(
+                    labelText: 'Account Number',
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter the account number';
@@ -68,8 +78,9 @@ class _BankingDetailsScreenState extends State<BankingDetailsScreen> {
                 ),
                 TextFormField(
                   controller: _accountHolderController,
-                  decoration:
-                      const InputDecoration(labelText: 'Account Holder Name'),
+                  decoration: const InputDecoration(
+                    labelText: 'Account Holder Name',
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter the account holder name';
@@ -102,10 +113,10 @@ class _BankingDetailsScreenState extends State<BankingDetailsScreen> {
                           .read<BankingProvider>()
                           .updateBankingInfo(bankingInfo)
                           .then((_) {
-                        if (mounted) {
-                          router.go('/home');
-                        }
-                      });
+                            if (mounted) {
+                              router.go('/home');
+                            }
+                          });
                     }
                   },
                   child: const Text('Save Banking Details'),

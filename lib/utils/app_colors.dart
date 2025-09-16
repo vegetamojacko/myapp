@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppColors {
   // Palette from the new logo
   static const Color primaryColor = Color(0xFF00838F); // Teal from logo
-  static const Color accentColor = Color(0xFFF57C00);  // Orange from logo
+  static const Color accentColor = Color(0xFFF57C00); // Orange from logo
 
   // Light Theme
   static const Color lightBackground = Color(0xFFF5F5F5);

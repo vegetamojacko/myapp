@@ -88,7 +88,8 @@ class _AuthScreenState extends State<AuthScreen> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-                content: Text('Registration failed. Please try again.')),
+              content: Text('Registration failed. Please try again.'),
+            ),
           );
         }
       } catch (e) {
@@ -114,8 +115,8 @@ class _AuthScreenState extends State<AuthScreen> {
             child: _isLoading
                 ? const CircularProgressIndicator()
                 : _isLogin
-                    ? _buildLoginForm(context)
-                    : _buildRegisterForm(context),
+                ? _buildLoginForm(context)
+                : _buildRegisterForm(context),
           ),
         ),
       ),
@@ -128,12 +129,12 @@ class _AuthScreenState extends State<AuthScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SvgPicture.asset(
-            'assets/Candibean.svg',
-            height: 100,
-          ),
+          SvgPicture.asset('assets/Candibean.svg', height: 100),
           const SizedBox(height: 24),
-          Text('Welcome Back', style: Theme.of(context).textTheme.headlineMedium),
+          Text(
+            'Welcome Back',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
           const SizedBox(height: 8),
           const Text('Log in to your account'),
           const SizedBox(height: 32),
@@ -186,12 +187,12 @@ class _AuthScreenState extends State<AuthScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SvgPicture.asset(
-            'assets/Candibean.svg',
-            height: 100,
-          ),
+          SvgPicture.asset('assets/Candibean.svg', height: 100),
           const SizedBox(height: 24),
-          Text('Create Account', style: Theme.of(context).textTheme.headlineMedium),
+          Text(
+            'Create Account',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
           const SizedBox(height: 8),
           const Text('Fill in your details to get started'),
           const SizedBox(height: 32),

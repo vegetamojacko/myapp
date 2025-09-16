@@ -14,10 +14,8 @@ class AuthService {
   ) async {
     User? user;
     try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      UserCredential userCredential = await _auth
+          .createUserWithEmailAndPassword(email: email, password: password);
       user = userCredential.user;
 
       if (user != null) {
@@ -34,22 +32,33 @@ class AuthService {
       return null;
     } on FirebaseAuthException catch (e) {
       // Handle specific auth errors (e.g., email-already-in-use)
-      developer.log('FirebaseAuthException: ${e.message}', name: 'AuthService.register', error: e);
+      developer.log(
+        'FirebaseAuthException: ${e.message}',
+        name: 'AuthService.register',
+        error: e,
+      );
       rethrow;
     } catch (e, s) {
       developer.log(
         'An error occurred while saving user data to Firestore.',
         name: 'AuthService.register',
         error: e,
-        stackTrace: s
+        stackTrace: s,
       );
       // Rollback: Delete the user from Auth if Firestore write fails
       if (user != null) {
         try {
           await user.delete();
-          developer.log('Successfully rolled back user creation for UID: ${user.uid}', name: 'AuthService.register');
+          developer.log(
+            'Successfully rolled back user creation for UID: ${user.uid}',
+            name: 'AuthService.register',
+          );
         } catch (deleteError) {
-          developer.log('Error rolling back user creation for UID: ${user.uid}', name: 'AuthService.register', error: deleteError);
+          developer.log(
+            'Error rolling back user creation for UID: ${user.uid}',
+            name: 'AuthService.register',
+            error: deleteError,
+          );
           // If rollback fails, this is a critical state. Log it.
         }
       }
@@ -66,10 +75,19 @@ class AuthService {
       );
       return userCredential.user;
     } on FirebaseAuthException catch (e) {
-      developer.log('FirebaseAuthException on sign in: ${e.message}', name: 'AuthService.signIn', error: e);
+      developer.log(
+        'FirebaseAuthException on sign in: ${e.message}',
+        name: 'AuthService.signIn',
+        error: e,
+      );
       rethrow;
     } catch (e, s) {
-      developer.log('Unexpected error on sign in.', name: 'AuthService.signIn', error: e, stackTrace: s);
+      developer.log(
+        'Unexpected error on sign in.',
+        name: 'AuthService.signIn',
+        error: e,
+        stackTrace: s,
+      );
       rethrow;
     }
   }

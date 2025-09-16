@@ -18,7 +18,9 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
   void initState() {
     super.initState();
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    _contactController = TextEditingController(text: userProvider.contactNumber);
+    _contactController = TextEditingController(
+      text: userProvider.contactNumber,
+    );
   }
 
   @override
@@ -53,8 +55,8 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
             if (_formKey.currentState!.validate()) {
               final userProvider = context.read<UserProvider>();
               userProvider.updateUser(
-                name: userProvider.name, 
-                email: userProvider.email, 
+                name: userProvider.name,
+                email: userProvider.email,
                 contactNumber: _contactController.text,
               );
               Navigator.pop(context);

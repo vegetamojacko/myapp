@@ -74,7 +74,10 @@ class _AddClaimFormState extends State<AddClaimForm> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Add New Event Claim', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Add New Event Claim',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _eventNameController,

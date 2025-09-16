@@ -1,0 +1,20 @@
+
+{
+  "car_washes": {
+    "cw001": {
+      "name": "Sparkle & Shine",
+      "address": "123 Main St, Anytown",
+      "price": 150.00
+    },
+    "cw002": {
+      "name": "Gleam Team",
+      "address": "456 Oak Ave, Anytown",
+      "price": 175.00
+    },
+    "cw003": {
+      "name": "The Car Spa",
+      "address": "789 Pine Ln, Anytown",
+      "price": 200.00
+    }
+  }
+}

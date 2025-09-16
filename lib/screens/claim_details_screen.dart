@@ -26,7 +26,9 @@ class _ClaimDetailsScreenState extends State<ClaimDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    _vehicleRegController = TextEditingController(text: widget.claim.vehicleReg);
+    _vehicleRegController = TextEditingController(
+      text: widget.claim.vehicleReg,
+    );
     _selectedDate = widget.claim.washDate ?? DateTime.now();
     _selectedWash = widget.claim.washType ?? 'Express Wash';
   }
@@ -73,9 +75,7 @@ class _ClaimDetailsScreenState extends State<ClaimDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Car Wash Claim'),
-      ),
+      appBar: AppBar(title: const Text('Edit Car Wash Claim')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -101,7 +101,8 @@ class _ClaimDetailsScreenState extends State<ClaimDetailsScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                          'Date of Wash: ${DateFormat.yMd().format(_selectedDate)}'),
+                        'Date of Wash: ${DateFormat.yMd().format(_selectedDate)}',
+                      ),
                     ),
                     TextButton(
                       onPressed: () async {
@@ -109,7 +110,9 @@ class _ClaimDetailsScreenState extends State<ClaimDetailsScreen> {
                           context: context,
                           initialDate: _selectedDate,
                           firstDate: DateTime.now(),
-                          lastDate: DateTime.now().add(const Duration(days: 365)),
+                          lastDate: DateTime.now().add(
+                            const Duration(days: 365),
+                          ),
                         );
                         if (newDate != null) {
                           setState(() {

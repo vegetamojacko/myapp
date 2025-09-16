@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
@@ -32,16 +31,19 @@ class ClaimsScreen extends StatelessWidget {
             return Center(child: Text('Error: ${state.message}'));
           } else if (state is ClaimsLoaded) {
             if (state.claims.isEmpty) {
-              return const Center(
-                child: Text('You have no claims. Add one!'),
-              );
+              return const Center(child: Text('You have no claims. Add one!'));
             }
             final pendingClaims = state.claims
                 .where((claim) => claim.status.toLowerCase() == 'pending')
                 .toList();
             final completedClaims = state.claims
-                .where((claim) =>
-                    claim.status.toLowerCase() == 'approved' || claim.status.toLowerCase() == 'cancelled' || claim.status.toLowerCase() == 'completed' || claim.status.toLowerCase() == 'failed')
+                .where(
+                  (claim) =>
+                      claim.status.toLowerCase() == 'approved' ||
+                      claim.status.toLowerCase() == 'cancelled' ||
+                      claim.status.toLowerCase() == 'completed' ||
+                      claim.status.toLowerCase() == 'failed',
+                )
                 .toList();
 
             return ListView(
@@ -54,9 +56,7 @@ class ClaimsScreen extends StatelessWidget {
               ],
             );
           } else {
-            return const Center(
-              child: Text('You have no claims.'),
-            );
+            return const Center(child: Text('You have no claims.'));
           }
         },
       ),
@@ -68,12 +68,18 @@ class ClaimsScreen extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        style: Theme.of(
+          context,
+        ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
       ),
     );
   }
 
-  Widget _buildClaimsList(BuildContext context, List<Claim> claims, {bool isHistory = false}) {
+  Widget _buildClaimsList(
+    BuildContext context,
+    List<Claim> claims, {
+    bool isHistory = false,
+  }) {
     if (claims.isEmpty) {
       return const Center(
         child: Padding(
@@ -103,9 +109,7 @@ class ClaimsScreen extends StatelessWidget {
                     horizontal: 16.0,
                     vertical: 8.0,
                   ),
-                  child: ClaimItem(
-                    claim: claim,
-                  ),
+                  child: ClaimItem(claim: claim),
                 ),
               ),
             ),

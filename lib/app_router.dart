@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -21,14 +20,8 @@ class AppRouter {
         path: '/splash',
         builder: (context, state) => const SplashScreen(),
       ),
-      GoRoute(
-        path: '/auth',
-        builder: (context, state) => const AuthScreen(),
-      ),
-      GoRoute(
-        path: '/home',
-        builder: (context, state) => const MainScreen(),
-      ),
+      GoRoute(path: '/auth', builder: (context, state) => const AuthScreen()),
+      GoRoute(path: '/home', builder: (context, state) => const MainScreen()),
       GoRoute(
         path: '/subscription',
         builder: (context, state) => const SubscriptionScreen(),
@@ -40,9 +33,7 @@ class AppRouter {
     ],
     errorPageBuilder: (context, state) => MaterialPage(
       child: Scaffold(
-        body: Center(
-          child: Text('Page not found: ${state.error}'),
-        ),
+        body: Center(child: Text('Page not found: ${state.error}')),
       ),
     ),
   );

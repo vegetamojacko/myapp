@@ -17,18 +17,18 @@ class BankingInfo {
   });
 
   Map<String, dynamic> toJson() => {
-        'bankName': bankName,
-        'accountNumber': accountNumber,
-        'accountHolder': accountHolder,
-        'branchCode': branchCode,
-      };
+    'bankName': bankName,
+    'accountNumber': accountNumber,
+    'accountHolder': accountHolder,
+    'branchCode': branchCode,
+  };
 
   factory BankingInfo.fromJson(Map<dynamic, dynamic> json) => BankingInfo(
-        bankName: json['bankName'] ?? '',
-        accountNumber: json['accountNumber'] ?? '',
-        accountHolder: json['accountHolder'] ?? '',
-        branchCode: json['branchCode'],
-      );
+    bankName: json['bankName'] ?? '',
+    accountNumber: json['accountNumber'] ?? '',
+    accountHolder: json['accountHolder'] ?? '',
+    branchCode: json['branchCode'],
+  );
 }
 
 class BankingProvider with ChangeNotifier {
@@ -47,15 +47,20 @@ class BankingProvider with ChangeNotifier {
 
   Future<void> loadBankingInfo(User user) async {
     try {
-      final snapshot = await _database.ref('users/${user.uid}/bankingInfo').get();
+      final snapshot = await _database
+          .ref('users/${user.uid}/bankingInfo')
+          .get();
       if (snapshot.exists) {
         final data = snapshot.value as Map<dynamic, dynamic>;
         _bankingInfo = BankingInfo.fromJson(data);
         notifyListeners();
       }
     } catch (e, s) {
-      developer.log('Error loading banking info: $e',
-          name: 'BankingProvider', stackTrace: s);
+      developer.log(
+        'Error loading banking info: $e',
+        name: 'BankingProvider',
+        stackTrace: s,
+      );
     }
   }
 
@@ -73,8 +78,9 @@ class BankingProvider with ChangeNotifier {
       try {
         await _database.ref('users/${currentUser.uid}/bankingInfo').remove();
         developer.log(
-            'Deleted banking info from Realtime Database for UID: ${currentUser.uid}',
-            name: 'BankingProvider');
+          'Deleted banking info from Realtime Database for UID: ${currentUser.uid}',
+          name: 'BankingProvider',
+        );
       } catch (e, s) {
         developer.log(
           'Error deleting banking info from Realtime Database for UID: ${currentUser.uid}',
@@ -94,8 +100,9 @@ class BankingProvider with ChangeNotifier {
             .ref('users/${currentUser.uid}/bankingInfo')
             .set(_bankingInfo!.toJson());
         developer.log(
-            'Saved banking info to Realtime Database for UID: ${currentUser.uid}',
-            name: 'BankingProvider');
+          'Saved banking info to Realtime Database for UID: ${currentUser.uid}',
+          name: 'BankingProvider',
+        );
       } catch (e, s) {
         developer.log(
           'Error saving banking info to Realtime Database for UID: ${currentUser.uid}',

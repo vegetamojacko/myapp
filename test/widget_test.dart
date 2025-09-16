@@ -12,12 +12,7 @@ import 'package:myapp/services/storage_service.dart';
 
 // A mock GoRouter for testing
 final _mockRouter = GoRouter(
-  routes: [
-    GoRoute(
-      path: '/',
-      builder: (context, state) => const HomeScreen(),
-    ),
-  ],
+  routes: [GoRoute(path: '/', builder: (context, state) => const HomeScreen())],
 );
 
 void main() {
@@ -36,9 +31,7 @@ void main() {
               create: (_) => ClaimsBloc(storageService: StorageService()),
             ),
           ],
-          child: MaterialApp.router(
-            routerConfig: _mockRouter,
-          ),
+          child: MaterialApp.router(routerConfig: _mockRouter),
         ),
       ),
     );

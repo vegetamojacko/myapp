@@ -21,9 +21,7 @@ final navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const App());
 }
 
@@ -64,12 +62,12 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _authSubscription =
-        FirebaseAuth.instance.authStateChanges().listen((user) {
+    _authSubscription = FirebaseAuth.instance.authStateChanges().listen((user) {
       if (!mounted) return;
       final claimsBloc = context.read<ClaimsBloc>();
       final userProvider = context.read<UserProvider>();
-      final bankingProvider = context.read<BankingProvider>(); // Get BankingProvider
+      final bankingProvider = context
+          .read<BankingProvider>(); // Get BankingProvider
 
       if (user != null) {
         userProvider.loadUserData(user);
