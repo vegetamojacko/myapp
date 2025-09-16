@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CarWash {
   final String id;
@@ -12,35 +15,35 @@ class CarWash {
     required this.address,
     required this.price,
   });
+
+  factory CarWash.fromJson(String id, Map<String, dynamic> json) {
+    return CarWash(
+      id: id,
+      name: json['name'],
+      address: json['address'],
+      price: json['price'].toDouble(),
+    );
+  }
 }
 
 class CarWashProvider with ChangeNotifier {
-  final List<CarWash> _carWashes = [
-    CarWash(
-      id: 'cw001',
-      name: 'Sparkle & Shine',
-      address: '123 Main St, Anytown',
-      price: 150.00,
-    ),
-    CarWash(
-      id: 'cw002',
-      name: 'Gleam Team',
-      address: '456 Oak Ave, Anytown',
-      price: 175.00,
-    ),
-    CarWash(
-      id: 'cw003',
-      name: 'The Car Spa',
-      address: '789 Pine Ln, Anytown',
-      price: 200.00,
-    ),
-  ];
+  List<CarWash> _carWashes = [];
 
   List<CarWash> get carWashes => _carWashes;
 
-  // In a real app, you would fetch this from your database
-  // Future<void> fetchCarWashes() async {
-  //   // Fetch from Firebase and update _carWashes
-  //   notifyListeners();
-  // }
+  Future<void> loadCarWashes() async {
+    try {
+      final String response = await rootBundle.loadString('assets/car_washes.json');
+      final data = await json.decode(response);
+      final carWashesData = data['car_washes'] as Map<String, dynamic>;
+      final List<CarWash> loadedCarWashes = [];
+      carWashesData.forEach((id, carWashData) {
+        loadedCarWashes.add(CarWash.fromJson(id, carWashData));
+      });
+      _carWashes = loadedCarWashes;
+      notifyListeners();
+    } catch (e) {
+      print('Error loading car washes: $e');
+    }
+  }
 }

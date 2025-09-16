@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:searchfield/searchfield.dart';
 import 'package:uuid/uuid.dart';
 
 import '../blocs/claims/claims_bloc.dart';
@@ -21,8 +22,8 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
   late TextEditingController _carRegController;
   late TextEditingController _washTypeController;
   late TextEditingController _totalAmountController;
+  late TextEditingController _carWashNameController;
   DateTime? _washDate;
-  String? _selectedCarWashName;
 
   @override
   void initState() {
@@ -31,8 +32,9 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
     _washTypeController = TextEditingController(text: widget.claim?.washType);
     _totalAmountController = TextEditingController(
         text: widget.claim?.totalAmount.toString() ?? '');
+    _carWashNameController =
+        TextEditingController(text: widget.claim?.carWashName);
     _washDate = widget.claim?.washDate ?? DateTime.now();
-    _selectedCarWashName = widget.claim?.carWashName;
   }
 
   void _submitForm() {
@@ -40,7 +42,7 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
       if (widget.claim != null) {
         // We are updating an existing claim
         final updatedClaim = widget.claim!.copyWith(
-          carWashName: _selectedCarWashName,
+          carWashName: _carWashNameController.text,
           vehicleReg: _carRegController.text,
           washType: _washTypeController.text,
           washDate: _washDate,
@@ -58,7 +60,7 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
         // We are creating a new claim
         final newClaim = Claim(
           id: const Uuid().v4(),
-          carWashName: _selectedCarWashName!,
+          carWashName: _carWashNameController.text,
           vehicleReg: _carRegController.text,
           washType: _washTypeController.text,
           washDate: _washDate,
@@ -121,27 +123,42 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
                 const SizedBox(height: 24),
 
                 // Form Fields
-                DropdownButtonFormField<String>(
-                  decoration: _inputDecoration(context, labelText: 'Car Wash Name'),
-                  hint: const Text('Select a car wash'),
-                  items: carWashes.map((CarWash carWash) {
-                    return DropdownMenuItem<String>(
-                      value: carWash.name,
-                      child: Text(carWash.name),
-                    );
-                  }).toList(),
-                  onChanged: (newValue) {
-                    setState(() {
-                      _selectedCarWashName = newValue;
-                    });
-                  },
+                SearchField(
+                  suggestions: carWashes
+                      .map((carWash) =>
+                          SearchFieldListItem(carWash.name, item: carWash))
+                      .toList(),
+                  suggestionState: Suggestion.expand,
+                  textInputAction: TextInputAction.next,
+                  controller: _carWashNameController,
                   validator: (value) {
-                    if (value == null) {
-                      return 'Please select a car wash';
+                    if (value == null ||
+                        value.isEmpty ||
+                        !carWashes.any((wash) => wash.name == value)) {
+                      return 'Please select a valid car wash from the list';
                     }
                     return null;
                   },
-                  initialValue: _selectedCarWashName,
+                  searchInputDecoration: SearchInputDecoration(
+                    labelText: 'Car Wash Name',
+                    hintText: 'Select a car wash',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2.0,
+                      ),
+                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                  onSuggestionTap: (SearchFieldListItem<CarWash> x) {
+                    _carWashNameController.text = x.item!.name;
+                    FocusScope.of(context).unfocus();
+                  },
                 ),
                 const SizedBox(height: 16),
                 TextFormField(

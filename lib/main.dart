@@ -39,7 +39,7 @@ class App extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(create: (_) => BankingProvider()),
-        ChangeNotifierProvider(create: (_) => CarWashProvider()),
+        ChangeNotifierProvider(create: (_) => CarWashProvider()..loadCarWashes()),
         BlocProvider(
           create: (context) => ClaimsBloc(storageService: StorageService()),
         ),
