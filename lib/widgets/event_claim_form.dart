@@ -233,11 +233,9 @@ class _EventClaimFormState extends State<EventClaimForm> {
                 onPressed: _submitForm,
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
-                  textStyle: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                child: Text(widget.claim != null ? 'Update' : 'Submit'),
+                child: Text(widget.claim != null ? 'Update Claim' : 'Submit Claim'),
               ),
-              const SizedBox(height: 16),
             ],
           ),
         ),

@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
-import '../blocs/claims/claims_bloc.dart';
-import '../blocs/claims/claims_state.dart';
-import '../models/claim.dart';
-import '../widgets/add_claim_form.dart';
-import '../widgets/claim_item.dart';
+import 'package:myapp/blocs/claims/claims_bloc.dart';
+import 'package:myapp/blocs/claims/claims_state.dart';
+import 'package:myapp/models/claim.dart';
+import 'package:myapp/widgets/claim_item.dart';
+import 'package:myapp/widgets/event_claim_form.dart';
+import 'package:myapp/widgets/car_wash_claim_form.dart';
 
 class ClaimsScreen extends StatelessWidget {
   const ClaimsScreen({super.key});
@@ -19,7 +20,7 @@ class ClaimsScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () => _showAddClaimSheet(context),
+            onPressed: () => _showAddClaimDialog(context),
           ),
         ],
       ),
@@ -119,14 +120,48 @@ class ClaimsScreen extends StatelessWidget {
     );
   }
 
-  void _showAddClaimSheet(BuildContext context) {
+  void _showAddClaimDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Select Claim Type'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.event),
+                title: const Text('Event Claim'),
+                onTap: () {
+                  Navigator.of(dialogContext).pop();
+                  _showClaimForm(context, isCarWash: false);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.local_car_wash),
+                title: const Text('Car Wash Claim'),
+                onTap: () {
+                  Navigator.of(dialogContext).pop();
+                  _showClaimForm(context, isCarWash: true);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showClaimForm(BuildContext context, {required bool isCarWash, Claim? claim}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (_) {
         return BlocProvider.value(
           value: BlocProvider.of<ClaimsBloc>(context),
-          child: const AddClaimForm(),
+          child: isCarWash
+              ? CarWashClaimForm(claim: claim)
+              : EventClaimForm(claim: claim),
         );
       },
     );
