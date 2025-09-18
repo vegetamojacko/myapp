@@ -12,7 +12,7 @@ class StorageService {
   Stream<List<Claim>> getClaimsStream() {
     User? currentUser = _auth.currentUser;
     if (currentUser == null) {
-      return Stream.value([]); // Return an empty stream if no user is logged in
+      return Stream.value([]);
     }
 
     final ref = _database.ref('users/${currentUser.uid}/claims');
@@ -21,14 +21,27 @@ class StorageService {
       final snapshot = event.snapshot;
       if (snapshot.exists && snapshot.value != null) {
         final data = snapshot.value;
+        List<Claim> claims = [];
         if (data is List) {
-          return data
-              .map((claim) => Claim.fromJson(Map<String, dynamic>.from(claim)))
+          // It's a dense list, filter out any nulls
+          claims = data
+              .where((item) => item != null && item is Map)
+              .map((item) => Claim.fromJson(Map<String, dynamic>.from(item as Map)))
               .toList();
         } else if (data is Map) {
-          // Handle if data is a map (e.g., from older versions)
-          return [Claim.fromJson(Map<String, dynamic>.from(data))];
+          // It's a sparse list (map with int keys) or just a map of claims.
+          // Iterate over values to be safe.
+          for (final item in data.values) {
+            if (item != null && item is Map) {
+              try {
+                claims.add(Claim.fromJson(Map<String, dynamic>.from(item)));
+              } catch (e) {
+                print('Error parsing a claim from map: $e');
+              }
+            }
+          }
         }
+        return claims;
       }
       return [];
     });
@@ -44,14 +57,31 @@ class StorageService {
 
   Future<List<Claim>> loadClaims() async {
     User? currentUser = _auth.currentUser;
-    if (currentUser != null) {
-      final snapshot = await _database
-          .ref('users/${currentUser.uid}/claims')
-          .get();
-      if (snapshot.exists) {
-        final List<dynamic> claimsJson = snapshot.value as List<dynamic>;
-        return claimsJson.map((json) => Claim.fromJson(json)).toList();
+    if (currentUser == null) {
+      return [];
+    }
+
+    final snapshot = await _database.ref('users/${currentUser.uid}/claims').get();
+    if (snapshot.exists && snapshot.value != null) {
+      final data = snapshot.value;
+      List<Claim> claims = [];
+      if (data is List) {
+        claims = data
+            .where((item) => item != null && item is Map)
+            .map((item) => Claim.fromJson(Map<String, dynamic>.from(item as Map)))
+            .toList();
+      } else if (data is Map) {
+        for (final item in data.values) {
+          if (item != null && item is Map) {
+            try {
+              claims.add(Claim.fromJson(Map<String, dynamic>.from(item)));
+            } catch (e) {
+              print('Error parsing a claim from map: $e');
+            }
+          }
+        }
       }
+      return claims;
     }
     return [];
   }
