@@ -18,18 +18,27 @@ import './providers/user_provider.dart';
 import './services/storage_service.dart';
 import './utils/app_themes.dart';
 
-final navigatorKey = GlobalKey<NavigatorState>();
-
 void main() async {
+  // This is the correct place for ensureInitialized
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(App());
+  
+  // Set up all dependencies before running the app
+  final navigatorKey = GlobalKey<NavigatorState>();
+  final appRouter = AppRouter(navigatorKey);
+  final storageService = StorageService();
+  final claimsBloc = ClaimsBloc(storageService: storageService);
+
+  runApp(App(appRouter: appRouter, claimsBloc: claimsBloc));
 }
 
 class App extends StatelessWidget {
-  final AppRouter _appRouter = AppRouter(navigatorKey);
+  final AppRouter appRouter;
+  final ClaimsBloc claimsBloc;
 
-  App({super.key});
+  const App({super.key, required this.appRouter, required this.claimsBloc});
 
   @override
   Widget build(BuildContext context) {
@@ -40,11 +49,10 @@ class App extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(create: (_) => BankingProvider()),
         ChangeNotifierProvider(create: (_) => CarWashProvider()..loadCarWashes()),
-        BlocProvider(
-          create: (context) => ClaimsBloc(storageService: StorageService()),
-        ),
+        // Provide the already-created ClaimsBloc instance
+        BlocProvider.value(value: claimsBloc),
       ],
-      child: MyApp(appRouter: _appRouter),
+      child: MyApp(appRouter: appRouter),
     );
   }
 }
@@ -60,27 +68,28 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late StreamSubscription<User?> _authSubscription;
-  late final ClaimsBloc _claimsBloc;
-  late final UserProvider _userProvider;
-  late final BankingProvider _bankingProvider;
 
   @override
   void initState() {
     super.initState();
-    // Grab the providers before the async gap.
-    _claimsBloc = context.read<ClaimsBloc>();
-    _userProvider = context.read<UserProvider>();
-    _bankingProvider = context.read<BankingProvider>();
+    
+    // It's safer to access providers and blocs within initState like this
+    // to avoid issues with context availability.
+    final claimsBloc = context.read<ClaimsBloc>();
+    final userProvider = context.read<UserProvider>();
+    final bankingProvider = context.read<BankingProvider>();
 
     _authSubscription = FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (!mounted) return; // Check if the widget is still in the tree
+      
       if (user != null) {
-        _userProvider.loadUserData(user);
-        _bankingProvider.loadBankingInfo(user);
-        _claimsBloc.add(LoadClaims());
+        userProvider.loadUserData(user);
+        bankingProvider.loadBankingInfo(user);
+        claimsBloc.add(LoadClaims());
       } else {
-        _userProvider.clearUserData();
-        _bankingProvider.clearBankingInfo();
-        _claimsBloc.add(LoadClaims()); // Or an event that clears the claims
+        userProvider.clearUserData();
+        bankingProvider.clearBankingInfo();
+        claimsBloc.add(LoadClaims()); // Consider a specific 'ClearClaimsEvent'
       }
     });
   }

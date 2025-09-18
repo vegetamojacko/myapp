@@ -8,6 +8,7 @@ import '../blocs/claims/claims_event.dart';
 import '../models/claim.dart';
 import '../models/car_wash.dart';
 import '../providers/car_wash_provider.dart';
+import '../providers/banking_provider.dart'; // Import BankingProvider
 
 class CarWashClaimForm extends StatefulWidget {
   final Claim? claim;
@@ -40,17 +41,26 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
+      final bankingProvider = context.read<BankingProvider>();
+
       if (widget.claim != null) {
         // We are updating an existing claim
+        final oldTotalAmount = widget.claim!.totalAmount;
+        final newTotalAmount = double.parse(_totalAmountController.text);
+
         final updatedClaim = widget.claim!.copyWith(
           carWashName: _carWashNameController.text,
           vehicleReg: _carRegController.text,
           washType: _washTypeController.text,
           washDate: _washDate,
-          totalAmount: double.parse(_totalAmountController.text),
+          totalAmount: newTotalAmount,
           status: 'Pending', // Reset status on update
         );
         context.read<ClaimsBloc>().add(UpdateClaim(updatedClaim));
+        bankingProvider.updateAmountsOnClaim(
+          oldClaimAmount: oldTotalAmount,
+          newClaimAmount: newTotalAmount,
+        );
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Car wash claim updated successfully!'),
@@ -59,6 +69,7 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
         );
       } else {
         // We are creating a new claim
+        final newTotalAmount = double.parse(_totalAmountController.text);
         final newClaim = Claim(
           id: const Uuid().v4(),
           carWashName: _carWashNameController.text,
@@ -67,10 +78,14 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
           washDate: _washDate,
           status: 'Pending',
           submittedDate: DateTime.now().toIso8601String(),
-          totalAmount: double.parse(_totalAmountController.text),
+          totalAmount: newTotalAmount,
           isCarWashClaim: true,
         );
         context.read<ClaimsBloc>().add(AddClaim(newClaim));
+        bankingProvider.updateAmountsOnClaim(
+          oldClaimAmount: 0.0,
+          newClaimAmount: newTotalAmount,
+        );
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Car wash claim submitted successfully!'),

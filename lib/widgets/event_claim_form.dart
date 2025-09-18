@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart'; // Import Provider
 import 'package:uuid/uuid.dart';
 
 import '../blocs/claims/claims_bloc.dart';
 import '../blocs/claims/claims_event.dart';
 import '../models/claim.dart';
+import '../providers/banking_provider.dart'; // Import BankingProvider
 
 class EventClaimForm extends StatefulWidget {
   final Claim? claim;
@@ -67,18 +69,26 @@ class _EventClaimFormState extends State<EventClaimForm> {
     if (_formKey.currentState!.validate()) {
       final ticketCost = double.parse(_ticketCostController.text);
       final numTickets = int.parse(_numTicketsController.text);
+      final bankingProvider = context.read<BankingProvider>();
 
       if (widget.claim != null) {
         // Update existing claim
+        final oldTotalAmount = widget.claim!.totalAmount;
+        final newTotalAmount = ticketCost * numTickets;
+
         final updatedClaim = widget.claim!.copyWith(
           eventName: _eventNameController.text,
           eventDate: _selectedDate,
           ticketCost: ticketCost,
           numTickets: numTickets,
           deliveryAddress: _deliveryAddressController.text,
-          totalAmount: ticketCost * numTickets,
+          totalAmount: newTotalAmount,
         );
         context.read<ClaimsBloc>().add(UpdateClaim(updatedClaim));
+        bankingProvider.updateAmountsOnClaim(
+          oldClaimAmount: oldTotalAmount,
+          newClaimAmount: newTotalAmount,
+        );
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Event claim updated successfully!'),
@@ -87,11 +97,12 @@ class _EventClaimFormState extends State<EventClaimForm> {
         );
       } else {
         // Add new claim
+        final newTotalAmount = ticketCost * numTickets;
         final newClaim = Claim(
           id: const Uuid().v4(),
           eventName: _eventNameController.text,
           eventDate: _selectedDate,
-          totalAmount: ticketCost * numTickets,
+          totalAmount: newTotalAmount,
           status: 'Pending',
           isCarWashClaim: false,
           numTickets: numTickets,
@@ -99,6 +110,10 @@ class _EventClaimFormState extends State<EventClaimForm> {
           submittedDate: DateTime.now().toIso8601String(),
         );
         context.read<ClaimsBloc>().add(AddClaim(newClaim));
+        bankingProvider.updateAmountsOnClaim(
+          oldClaimAmount: 0.0,
+          newClaimAmount: newTotalAmount,
+        );
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Event claim submitted successfully!'),

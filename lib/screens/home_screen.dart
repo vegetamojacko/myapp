@@ -53,104 +53,82 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildWelcomeBanner(BuildContext context) {
-    return BlocBuilder<ClaimsBloc, ClaimsState>(
-      builder: (context, claimsState) {
-        double totalUsed = 0;
-        if (claimsState is ClaimsLoaded) {
-          totalUsed = claimsState.claims
-              .where((claim) => claim.status.toLowerCase() == 'approved')
-              .fold(0, (previousValue, claim) => previousValue + claim.totalAmount);
-        }
+    return Consumer2<UserProvider, BankingProvider>(
+      builder: (context, userProvider, bankingProvider, child) {
+        final plan = userProvider.selectedPlan;
 
-        return Consumer<UserProvider>(
-          builder: (context, userProvider, child) {
-            final bankingProvider = Provider.of<BankingProvider>(context);
-            final plan = userProvider.selectedPlan;
-            final availableAmount =
-                (plan?['amountAvailable'] ?? 0.0) - totalUsed;
-
-            return Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24.0),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.primary.withAlpha(200),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16.0),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Welcome Back, ${userProvider.name}!',
-                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24.0),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.primary.withAlpha(200),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Welcome Back, ${userProvider.name}!',
+                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (plan != null) ...[
-                    if (bankingProvider.bankingInfo == null)
-                      Text(
-                        'Joined: ${_formatTimestamp(plan['dateJoined'])}',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodyLarge!.copyWith(color: Colors.white70),
-                      )
-                    else
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Current Plan: ${plan['name']}',
-                            style: Theme.of(context).textTheme.bodyLarge!
-                                .copyWith(color: Colors.white70),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildInfoColumn(
-                                  context,
-                                  'Joined',
-                                  _formatTimestamp(plan['dateJoined'] ?? 0.0),
-                                ),
-                              ),
-                              Expanded(
-                                child: _buildInfoColumn(
-                                  context,
-                                  'Available',
-                                  'R${availableAmount.toStringAsFixed(2)}',
-                                ),
-                              ),
-                              Expanded(
-                                child: _buildInfoColumn(
-                                  context,
-                                  'Used',
-                                  'R${totalUsed.toStringAsFixed(2)}',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                  ] else ...[
+              ),
+              const SizedBox(height: 8),
+              if (plan != null) ...[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      'No active plan.',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyLarge!.copyWith(color: Colors.white70),
+                      'Current Plan: ${plan['name']}',
+                      style: Theme.of(context).textTheme.bodyLarge!
+                          .copyWith(color: Colors.white70),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildInfoColumn(
+                            context,
+                            'Joined',
+                            _formatTimestamp(plan['dateJoined'] ?? 0.0),
+                          ),
+                        ),
+                        Expanded(
+                          child: _buildInfoColumn(
+                            context,
+                            'Available',
+                            'R${bankingProvider.amountAvailable.toStringAsFixed(2)}',
+                          ),
+                        ),
+                        Expanded(
+                          child: _buildInfoColumn(
+                            context,
+                            'Used',
+                            'R${bankingProvider.amountUsed.toStringAsFixed(2)}',
+                          ),
+                        ),
+                      ],
                     ),
                   ],
-                ],
-              ),
-            );
-          },
+                ),
+              ] else ...[
+                Text(
+                  'No active plan.',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge!.copyWith(color: Colors.white70),
+                ),
+              ],
+            ],
+          ),
         );
       },
     );
@@ -181,13 +159,19 @@ class HomeScreen extends StatelessWidget {
     final userProvider = Provider.of<UserProvider>(context);
     final bankingProvider = Provider.of<BankingProvider>(context);
     final plan = userProvider.selectedPlan;
+    
+    // Check if any claiming is disabled based on available funds
+    final bool isClaimingGloballyDisabled = bankingProvider.isClaimingDisabled;
+
+    // Original eligibility conditions
     final bool isEligible =
         plan != null &&
-        (plan['amountAvailable'] ?? 0.0) >= 100 &&
+        (plan['amountAvailable'] ?? 0.0) >= 100 && // This might need adjustment if 'amountAvailable' is solely from BankingProvider now.
         bankingProvider.bankingInfo != null;
 
     // Condition for enabling the event claim button
-    final bool canClaimEvent = isEligible && plan?['name'] != 'Car Wash';
+    final bool canClaimEvent = !isClaimingGloballyDisabled && isEligible && plan?['name'] != 'Car Wash';
+    final bool canClaimCarWash = !isClaimingGloballyDisabled && isEligible;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,7 +191,7 @@ class HomeScreen extends StatelessWidget {
               context,
               icon: Icons.directions_car,
               label: 'Claim Car Wash',
-              onTap: isEligible
+              onTap: canClaimCarWash
                   ? () => _showCarWashClaimSheet(context, claim: null)
                   : null,
             ),
