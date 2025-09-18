@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import 'package:provider/provider.dart';
 
 import 'package:myapp/blocs/claims/claims_bloc.dart';
 import 'package:myapp/blocs/claims/claims_state.dart';
 import 'package:myapp/models/claim.dart';
-import 'package:myapp/providers/user_provider.dart';
 import 'package:myapp/widgets/claim_item.dart';
 import 'package:myapp/widgets/event_claim_form.dart';
 import 'package:myapp/widgets/car_wash_claim_form.dart';
@@ -16,17 +14,13 @@ class ClaimsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
-    final selectedPlan = userProvider.selectedPlan;
-    final bool isCarWashPlan = selectedPlan?['name'] == 'Car Wash';
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Claims'),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: isCarWashPlan ? null : () => _showAddClaimDialog(context),
+            onPressed: () => _showAddClaimDialog(context),
           ),
         ],
       ),

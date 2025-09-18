@@ -186,9 +186,6 @@ class HomeScreen extends StatelessWidget {
         (plan['amountAvailable'] ?? 0.0) >= 100 &&
         bankingProvider.bankingInfo != null;
 
-    // Condition for enabling the event claim button
-    final bool canClaimEvent = isEligible && plan?['name'] != 'Car Wash';
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -201,7 +198,7 @@ class HomeScreen extends StatelessWidget {
               context,
               icon: Icons.event,
               label: 'Claim Event',
-              onTap: canClaimEvent ? () => _showAddClaimSheet(context) : null,
+              onTap: isEligible ? () => _showAddClaimSheet(context) : null,
             ),
             _buildActionCard(
               context,
