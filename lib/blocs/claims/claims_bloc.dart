@@ -20,6 +20,7 @@ class ClaimsBloc extends Bloc<ClaimsEvent, ClaimsState> {
     on<DeleteClaim>(_onDeleteClaim);
     on<ClearClaims>(_onClearClaims);
     on<_ClaimsUpdated>(_onClaimsUpdated);
+    on<_ClaimsError>(_onClaimsError);
   }
 
   @override
@@ -36,7 +37,7 @@ class ClaimsBloc extends Bloc<ClaimsEvent, ClaimsState> {
         add(_ClaimsUpdated(claims));
       },
       onError: (error) {
-        emit(ClaimsError("Failed to load claims: $error"));
+        add(_ClaimsError(error));
       },
     );
   }
@@ -94,6 +95,10 @@ class ClaimsBloc extends Bloc<ClaimsEvent, ClaimsState> {
   void _onClaimsUpdated(_ClaimsUpdated event, Emitter<ClaimsState> emit) {
     emit(ClaimsLoaded(event.claims));
   }
+
+  void _onClaimsError(_ClaimsError event, Emitter<ClaimsState> emit) {
+    emit(ClaimsError("Failed to load claims: ${event.error}"));
+  }
 }
 
 // Add this new private event
@@ -104,4 +109,13 @@ class _ClaimsUpdated extends ClaimsEvent {
 
   @override
   List<Object> get props => [claims];
+}
+
+class _ClaimsError extends ClaimsEvent {
+  final Object error;
+
+  const _ClaimsError(this.error);
+
+  @override
+  List<Object> get props => [error];
 }
