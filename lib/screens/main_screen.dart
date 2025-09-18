@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../friends_map_screen.dart';
 import '../providers/navigation_provider.dart';
 import './claims_screen.dart';
 import './home_screen.dart';
@@ -21,6 +22,7 @@ class _MainScreenState extends State<MainScreen> {
   static const List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
     ClaimsScreen(),
+    FriendsMapScreen(),
     SubscriptionScreen(),
     ProfileScreen(),
   ];
@@ -69,6 +71,10 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.assignment),
             label: 'Claims',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.map),
+            label: 'Friends',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.subscriptions),

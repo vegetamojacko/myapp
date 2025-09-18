@@ -1,6 +1,7 @@
 {
   "database": {
-    "rules": "database.rules.json"
+    "rules": "database.rules.json",
+    "databaseURL": "https://candibean-android-app-default-rtdb.firebaseio.com"
   },
   "firestore": {
     "database": "(default)",
