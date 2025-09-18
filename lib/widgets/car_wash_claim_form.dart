@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../blocs/claims/claims_bloc.dart';
 import '../blocs/claims/claims_event.dart';
 import '../models/claim.dart';
+import '../models/car_wash.dart';
 import '../providers/car_wash_provider.dart';
 
 class CarWashClaimForm extends StatefulWidget {
@@ -143,17 +144,8 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
                     labelText: 'Car Wash Name',
                     hintText: 'Select a car wash',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                      borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.primary,
-                        width: 2.0,
-                      ),
-                    ),
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   ),
                   onSuggestionTap: (SearchFieldListItem<CarWash> x) {
                     _carWashNameController.text = x.item!.name;
@@ -224,20 +216,11 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 32),
-
-                // Submit Button
+                const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: _submitForm,
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 50),
-                    textStyle: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  child: Text(
-                    widget.claim == null ? 'Submit Request' : 'Update Request',
-                  ),
+                  child: const Text('Submit'),
                 ),
-                SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
               ],
             ),
           ),
@@ -246,23 +229,13 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
     );
   }
 
-  InputDecoration _inputDecoration(
-    BuildContext context, {
-    required String labelText,
-    String? hintText,
-  }) {
+  InputDecoration _inputDecoration(BuildContext context, {required String labelText, String? hintText}) {
     return InputDecoration(
       labelText: labelText,
       hintText: hintText,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12.0),
-        borderSide: BorderSide(
-          color: Theme.of(context).colorScheme.primary,
-          width: 2.0,
-        ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     );
   }
 
@@ -270,7 +243,7 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _washDate ?? DateTime.now(),
-      firstDate: DateTime(2020),
+      firstDate: DateTime(2000),
       lastDate: DateTime(2101),
     );
     if (picked != null && picked != _washDate) {
