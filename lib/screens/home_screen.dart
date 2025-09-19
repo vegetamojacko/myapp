@@ -170,7 +170,7 @@ class HomeScreen extends StatelessWidget {
         bankingProvider.bankingInfo != null;
 
     // Condition for enabling the event claim button
-    final bool canClaimEvent = !isClaimingGloballyDisabled && isEligible && plan?['name'] != 'Car Wash';
+    final bool canClaimEvent = !isClaimingGloballyDisabled && isEligible && plan['name'] != 'Car Wash';
     final bool canClaimCarWash = !isClaimingGloballyDisabled && isEligible;
 
     return Column(

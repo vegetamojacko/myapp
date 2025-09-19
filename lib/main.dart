@@ -18,6 +18,8 @@ import './providers/user_provider.dart';
 import './services/storage_service.dart';
 import './utils/app_themes.dart';
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   // This is the correct place for ensureInitialized
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,7 +28,6 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   
   // Set up all dependencies before running the app
-  final navigatorKey = GlobalKey<NavigatorState>();
   final appRouter = AppRouter(navigatorKey);
   final storageService = StorageService();
   final claimsBloc = ClaimsBloc(storageService: storageService);

@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
+
+import '../models/claim.dart';
 
 class BankingInfo {
   final String bankName;
@@ -38,6 +41,8 @@ class BankingProvider with ChangeNotifier {
   BankingInfo? _bankingInfo;
   double _amountAvailable = 0.0;
   double _amountUsed = 0.0;
+  double _initialAmountAvailable = 0.0;
+  StreamSubscription? _claimsSubscription;
 
   BankingInfo? get bankingInfo => _bankingInfo;
   double get amountUsed => _amountUsed;
@@ -63,7 +68,7 @@ class BankingProvider with ChangeNotifier {
   Future<void> loadBankingInfo(User user) async {
     try {
       final bankingRef = _database.ref('users/${user.uid}/bankingInfo');
-      final selectedPlanRef = _database.ref('users/${user.uid}/selectedPlan'); // Corrected path
+      final selectedPlanRef = _database.ref('users/${user.uid}/selectedPlan');
 
       final bankingSnapshot = await bankingRef.get();
       if (bankingSnapshot.exists) {
@@ -74,8 +79,8 @@ class BankingProvider with ChangeNotifier {
       final selectedPlanSnapshot = await selectedPlanRef.get();
       if (selectedPlanSnapshot.exists) {
         final data = selectedPlanSnapshot.value as Map<dynamic, dynamic>;
-        // Use 'amountAvailable' from DB which is the total budget initially
-        _amountAvailable = (data['amountAvailable'] as num?)?.toDouble() ?? 0.0;
+        _initialAmountAvailable = (data['amountAvailable'] as num?)?.toDouble() ?? 0.0;
+        _amountAvailable = _initialAmountAvailable;
         _amountUsed = (data['amountUsed'] as num?)?.toDouble() ?? 0.0;
       }
       notifyListeners();
@@ -86,6 +91,46 @@ class BankingProvider with ChangeNotifier {
         stackTrace: s,
       );
     }
+  }
+
+  void listenToClaims(User user) {
+    _claimsSubscription?.cancel();
+    final claimsRef = _database.ref('users/${user.uid}/claims');
+    _claimsSubscription = claimsRef.onValue.listen((event) async {
+      if (event.snapshot.exists && event.snapshot.value != null) {
+        final data = event.snapshot.value;
+        List<Claim> claims = [];
+        if (data is List) {
+          claims = data
+              .where((item) => item != null && item is Map)
+              .map((item) => Claim.fromJson(Map<String, dynamic>.from(item as Map)))
+              .toList();
+        } else if (data is Map) {
+          for (final item in data.values) {
+            if (item != null && item is Map) {
+              try {
+                claims.add(Claim.fromJson(Map<String, dynamic>.from(item)));
+              } catch (e) {
+                developer.log('Error parsing a claim from map: $e');
+              }
+            }
+          }
+        }
+
+        double totalApprovedAmount = 0;
+        for (var claim in claims) {
+          if (claim.status == 'Approved') {
+            totalApprovedAmount += claim.totalAmount;
+          }
+        }
+
+        _amountUsed = totalApprovedAmount;
+        _amountAvailable = _initialAmountAvailable - _amountUsed;
+
+        await _updateSelectedPlan();
+        notifyListeners();
+      }
+    });
   }
 
   void clearBankingInfo() {
@@ -105,7 +150,6 @@ class BankingProvider with ChangeNotifier {
     if (currentUser != null) {
       try {
         await _database.ref('users/${currentUser.uid}/bankingInfo').remove();
-        // Also clear the amounts in the selectedPlan, but don't remove the whole plan
         await _database.ref('users/${currentUser.uid}/selectedPlan').update({
           'amountAvailable': 0,
           'amountUsed': 0
@@ -147,7 +191,6 @@ class BankingProvider with ChangeNotifier {
     }
   }
 
-  // Renamed and corrected to update the selectedPlan node
   Future<void> _updateSelectedPlan() async {
     User? currentUser = _auth.currentUser;
     if (currentUser != null) {

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/foundation.dart';
 
 import '../models/claim.dart';
 
@@ -36,7 +37,9 @@ class StorageService {
               try {
                 claims.add(Claim.fromJson(Map<String, dynamic>.from(item)));
               } catch (e) {
-                print('Error parsing a claim from map: $e');
+                if (kDebugMode) {
+                  print('Error parsing a claim from map: $e');
+                }
               }
             }
           }
@@ -76,7 +79,9 @@ class StorageService {
             try {
               claims.add(Claim.fromJson(Map<String, dynamic>.from(item)));
             } catch (e) {
-              print('Error parsing a claim from map: $e');
+              if (kDebugMode) {
+                print('Error parsing a claim from map: $e');
+              }
             }
           }
         }

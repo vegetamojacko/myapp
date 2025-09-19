@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
@@ -44,7 +43,7 @@ class CarWashProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      print('Error loading car washes: $e');
+      debugPrint('Error loading car washes: $e');
     }
   }
 }

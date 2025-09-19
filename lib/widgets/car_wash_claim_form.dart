@@ -6,9 +6,9 @@ import 'package:uuid/uuid.dart';
 import '../blocs/claims/claims_bloc.dart';
 import '../blocs/claims/claims_event.dart';
 import '../models/claim.dart';
-import '../models/car_wash.dart';
 import '../providers/car_wash_provider.dart';
-import '../providers/banking_provider.dart'; // Import BankingProvider
+import '../providers/banking_provider.dart'; 
+import '../models/car_wash.dart';
 
 class CarWashClaimForm extends StatefulWidget {
   final Claim? claim;
@@ -162,18 +162,20 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  onSuggestionTap: (SearchFieldListItem<CarWash> x) {
-                    _carWashNameController.text = x.item!.name;
+                  onSuggestionTap: (SearchFieldListItem<dynamic> x) {
+                    _carWashNameController.text = (x.item as CarWash).name;
                     FocusScope.of(context).unfocus();
                   },
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _washTypeController,
-                  decoration: _inputDecoration(
-                    context,
+                  decoration: InputDecoration(
                     labelText: 'Type of Wash',
                     hintText: 'e.g., Full Valet',
+                     border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -185,10 +187,12 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _carRegController,
-                  decoration: _inputDecoration(
-                    context,
+                  decoration: InputDecoration(
                     labelText: 'Car Registration',
                     hintText: 'e.g., GP 123 AB',
+                     border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -203,7 +207,9 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
                 InkWell(
                   onTap: () => _selectDate(context),
                   child: InputDecorator(
-                    decoration: _inputDecoration(context, labelText: 'Date'),
+                    decoration: InputDecoration(labelText: 'Date',  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),),
                     child: Text(
                       _washDate != null
                           ? '${_washDate!.toLocal()}'.split(' ')[0]
@@ -215,10 +221,12 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _totalAmountController,
-                  decoration: _inputDecoration(
-                    context,
+                  decoration: InputDecoration(
                     labelText: 'Total Amount',
                     hintText: 'e.g., 250.00',
+                     border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                   keyboardType: TextInputType.number,
                   validator: (value) {
@@ -240,16 +248,6 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  InputDecoration _inputDecoration(BuildContext context, {required String labelText, String? hintText}) {
-    return InputDecoration(
-      labelText: labelText,
-      hintText: hintText,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
       ),
     );
   }
