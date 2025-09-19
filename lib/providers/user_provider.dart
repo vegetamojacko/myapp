@@ -35,23 +35,15 @@ class UserProvider with ChangeNotifier {
   }
 
   void setSubscription(String planName, String planPriceString) {
-    final double planPrice = _parsePrice(planPriceString);
-    final dynamic dateJoined =
-        _selectedPlan?['dateJoined'] ?? ServerValue.timestamp;
-    final double oldAmountAvailable =
-        (_selectedPlan?['amountAvailable'] as num?)?.toDouble() ?? 0.0;
-    final double oldAmountUsed =
-        (_selectedPlan?['amountUsed'] as num?)?.toDouble() ?? 0.0;
+    final double newPlanPrice = _parsePrice(planPriceString);
 
-    // Calculate the remaining balance which becomes the new available amount
-    final double newAmountAvailable = oldAmountAvailable - oldAmountUsed;
-
+    // Preserve existing financial data, only update plan name and price.
     _selectedPlan = {
       'name': planName,
-      'price': planPrice,
-      'dateJoined': dateJoined,
-      'amountAvailable': newAmountAvailable,
-      'amountUsed': 0.0, // Reset amount used for the new plan
+      'price': newPlanPrice,
+      'dateJoined': _selectedPlan?['dateJoined'] ?? ServerValue.timestamp,
+      'amountAvailable': (_selectedPlan?['amountAvailable'] as num?)?.toDouble() ?? 0.0,
+      'amountUsed': (_selectedPlan?['amountUsed'] as num?)?.toDouble() ?? 0.0,
     };
     notifyListeners();
   }

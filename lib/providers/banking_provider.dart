@@ -41,8 +41,8 @@ class BankingProvider with ChangeNotifier {
   BankingInfo? _bankingInfo;
   double _amountAvailable = 0.0;
   double _amountUsed = 0.0;
-  double _initialAmountAvailable = 0.0;
   StreamSubscription? _claimsSubscription;
+  bool _isInitialClaimsLoad = true;
 
   BankingInfo? get bankingInfo => _bankingInfo;
   double get amountUsed => _amountUsed;
@@ -66,6 +66,7 @@ class BankingProvider with ChangeNotifier {
   }
 
   Future<void> loadBankingInfo(User user) async {
+    _isInitialClaimsLoad = true; // Reset flag on new user load
     try {
       final bankingRef = _database.ref('users/${user.uid}/bankingInfo');
       final selectedPlanRef = _database.ref('users/${user.uid}/selectedPlan');
@@ -79,9 +80,7 @@ class BankingProvider with ChangeNotifier {
       final selectedPlanSnapshot = await selectedPlanRef.get();
       if (selectedPlanSnapshot.exists) {
         final data = selectedPlanSnapshot.value as Map<dynamic, dynamic>;
-        _initialAmountAvailable =
-            (data['amountAvailable'] as num?)?.toDouble() ?? 0.0;
-        _amountAvailable = _initialAmountAvailable;
+        _amountAvailable = (data['amountAvailable'] as num?)?.toDouble() ?? 0.0;
         _amountUsed = (data['amountUsed'] as num?)?.toDouble() ?? 0.0;
       }
       notifyListeners();
@@ -98,6 +97,11 @@ class BankingProvider with ChangeNotifier {
     _claimsSubscription?.cancel();
     final claimsRef = _database.ref('users/${user.uid}/claims');
     _claimsSubscription = claimsRef.onValue.listen((event) async {
+      if (_isInitialClaimsLoad) {
+        _isInitialClaimsLoad = false;
+        return; // Do not run calculation on initial load
+      }
+
       if (event.snapshot.exists && event.snapshot.value != null) {
         final data = event.snapshot.value;
         List<Claim> claims = [];
@@ -119,15 +123,21 @@ class BankingProvider with ChangeNotifier {
           }
         }
 
-        double totalApprovedAmount = 0;
+        double newTotalApprovedAmount = 0;
         for (var claim in claims) {
           if (claim.status == 'Approved') {
-            totalApprovedAmount += claim.totalAmount;
+            newTotalApprovedAmount += claim.totalAmount;
           }
         }
 
-        _amountUsed = totalApprovedAmount;
-        _amountAvailable = _initialAmountAvailable - _amountUsed;
+        final double delta = newTotalApprovedAmount - _amountUsed;
+
+        if (delta == 0) {
+          return; // No changes in approved claims, so do nothing.
+        }
+
+        _amountUsed += delta;
+        _amountAvailable -= delta;
 
         await _updateSelectedPlan();
         notifyListeners();
@@ -139,6 +149,8 @@ class BankingProvider with ChangeNotifier {
     _bankingInfo = null;
     _amountAvailable = 0.0;
     _amountUsed = 0.0;
+    _isInitialClaimsLoad = true;
+    _claimsSubscription?.cancel();
     notifyListeners();
   }
 
@@ -168,6 +180,12 @@ class BankingProvider with ChangeNotifier {
         );
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _claimsSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _saveBankingInfo() async {
