@@ -29,6 +29,11 @@ class _AuthScreenState extends State<AuthScreen> {
   final _loginEmailController = TextEditingController();
   final _loginPasswordController = TextEditingController();
 
+  // State variables to toggle password visibility
+  bool _isLoginPasswordVisible = false;
+  bool _isCreatePasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
+
   void _toggleForm() {
     setState(() {
       _isLogin = !_isLogin;
@@ -154,10 +159,22 @@ class _AuthScreenState extends State<AuthScreen> {
           const SizedBox(height: 16),
           TextFormField(
             controller: _loginPasswordController,
-            obscureText: true,
-            decoration: const InputDecoration(
+            obscureText: !_isLoginPasswordVisible,
+            decoration: InputDecoration(
               labelText: 'Password',
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _isLoginPasswordVisible
+                      ? Icons.visibility
+                      : Icons.visibility_off,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isLoginPasswordVisible = !_isLoginPasswordVisible;
+                  });
+                },
+              ),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -240,10 +257,22 @@ class _AuthScreenState extends State<AuthScreen> {
           const SizedBox(height: 16),
           TextFormField(
             controller: _passwordController,
-            obscureText: true,
-            decoration: const InputDecoration(
+            obscureText: !_isCreatePasswordVisible,
+            decoration: InputDecoration(
               labelText: 'Create password',
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _isCreatePasswordVisible
+                      ? Icons.visibility
+                      : Icons.visibility_off,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isCreatePasswordVisible = !_isCreatePasswordVisible;
+                  });
+                },
+              ),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -255,10 +284,22 @@ class _AuthScreenState extends State<AuthScreen> {
           const SizedBox(height: 16),
           TextFormField(
             controller: _confirmPasswordController,
-            obscureText: true,
-            decoration: const InputDecoration(
+            obscureText: !_isConfirmPasswordVisible,
+            decoration: InputDecoration(
               labelText: 'Confirm password',
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _isConfirmPasswordVisible
+                      ? Icons.visibility
+                      : Icons.visibility_off,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                  });
+                },
+              ),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {

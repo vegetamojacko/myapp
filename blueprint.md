@@ -10,11 +10,20 @@ The app uses the Material Design 3 theme, with a color scheme generated from a s
 
 ## Features
 
+### Authentication
+
+- **Password Visibility Toggle:** The login and registration screens now feature an "eye" icon that allows users to toggle the visibility of the password they are typing.
+
 ### Car Wash Claims
 
 - Users can submit claims for car washes.
 - The car wash claim form includes a dropdown to select the car wash name from a predefined list.
 - The selected car wash name is stored in the `Claim` model and displayed in the claim details.
+
+### Security
+
+- **Firestore Security Rules:** Implemented rules in `firestore.rules` to ensure that users can only create, read, update, or delete their own user data and claims.
+- **Realtime Database Security Rules:** Implemented rules in `database.rules.json` to secure the Realtime Database. Users can only access and modify their own data, and all other database paths are locked down by default.
 
 ### Current Plan
 
