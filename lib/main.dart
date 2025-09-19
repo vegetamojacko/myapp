@@ -23,10 +23,10 @@ final navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   // This is the correct place for ensureInitialized
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  
+
   // Set up all dependencies before running the app
   final appRouter = AppRouter(navigatorKey);
   final storageService = StorageService();
@@ -49,7 +49,8 @@ class App extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(create: (_) => BankingProvider()),
-        ChangeNotifierProvider(create: (_) => CarWashProvider()..loadCarWashes()),
+        ChangeNotifierProvider(
+            create: (_) => CarWashProvider()..loadCarWashes()),
         // Provide the already-created ClaimsBloc instance
         BlocProvider.value(value: claimsBloc),
       ],
@@ -73,7 +74,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    
+
     // It's safer to access providers and blocs within initState like this
     // to avoid issues with context availability.
     final claimsBloc = context.read<ClaimsBloc>();
@@ -82,10 +83,11 @@ class _MyAppState extends State<MyApp> {
 
     _authSubscription = FirebaseAuth.instance.authStateChanges().listen((user) {
       if (!mounted) return; // Check if the widget is still in the tree
-      
+
       if (user != null) {
         userProvider.loadUserData(user);
         bankingProvider.loadBankingInfo(user);
+        bankingProvider.listenToClaims(user);
         claimsBloc.add(LoadClaims());
       } else {
         userProvider.clearUserData();

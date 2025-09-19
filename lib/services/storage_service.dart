@@ -27,7 +27,8 @@ class StorageService {
           // It's a dense list, filter out any nulls
           claims = data
               .where((item) => item != null && item is Map)
-              .map((item) => Claim.fromJson(Map<String, dynamic>.from(item as Map)))
+              .map((item) =>
+                  Claim.fromJson(Map<String, dynamic>.from(item as Map)))
               .toList();
         } else if (data is Map) {
           // It's a sparse list (map with int keys) or just a map of claims.
@@ -64,14 +65,16 @@ class StorageService {
       return [];
     }
 
-    final snapshot = await _database.ref('users/${currentUser.uid}/claims').get();
+    final snapshot =
+        await _database.ref('users/${currentUser.uid}/claims').get();
     if (snapshot.exists && snapshot.value != null) {
       final data = snapshot.value;
       List<Claim> claims = [];
       if (data is List) {
         claims = data
             .where((item) => item != null && item is Map)
-            .map((item) => Claim.fromJson(Map<String, dynamic>.from(item as Map)))
+            .map((item) =>
+                Claim.fromJson(Map<String, dynamic>.from(item as Map)))
             .toList();
       } else if (data is Map) {
         for (final item in data.values) {

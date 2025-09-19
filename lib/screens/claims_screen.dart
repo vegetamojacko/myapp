@@ -26,7 +26,8 @@ class ClaimsScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: isCarWashPlan ? null : () => _showAddClaimDialog(context),
+            onPressed:
+                isCarWashPlan ? null : () => _showAddClaimDialog(context),
           ),
         ],
       ),
@@ -158,7 +159,8 @@ class ClaimsScreen extends StatelessWidget {
     );
   }
 
-  void _showClaimForm(BuildContext context, {required bool isCarWash, Claim? claim}) {
+  void _showClaimForm(BuildContext context,
+      {required bool isCarWash, Claim? claim}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

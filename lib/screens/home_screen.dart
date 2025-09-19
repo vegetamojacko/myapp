@@ -88,7 +88,9 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     Text(
                       'Current Plan: ${plan['name']}',
-                      style: Theme.of(context).textTheme.bodyLarge!
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge!
                           .copyWith(color: Colors.white70),
                     ),
                     const SizedBox(height: 8),
@@ -159,18 +161,19 @@ class HomeScreen extends StatelessWidget {
     final userProvider = Provider.of<UserProvider>(context);
     final bankingProvider = Provider.of<BankingProvider>(context);
     final plan = userProvider.selectedPlan;
-    
+
     // Check if any claiming is disabled based on available funds
     final bool isClaimingGloballyDisabled = bankingProvider.isClaimingDisabled;
 
     // Original eligibility conditions
-    final bool isEligible =
-        plan != null &&
-        (plan['amountAvailable'] ?? 0.0) >= 100 && // This might need adjustment if 'amountAvailable' is solely from BankingProvider now.
+    final bool isEligible = plan != null &&
+        (plan['amountAvailable'] ?? 0.0) >=
+            100 && // This might need adjustment if 'amountAvailable' is solely from BankingProvider now.
         bankingProvider.bankingInfo != null;
 
     // Condition for enabling the event claim button
-    final bool canClaimEvent = !isClaimingGloballyDisabled && isEligible && plan['name'] != 'Car Wash';
+    final bool canClaimEvent =
+        !isClaimingGloballyDisabled && isEligible && plan['name'] != 'Car Wash';
     final bool canClaimCarWash = !isClaimingGloballyDisabled && isEligible;
 
     return Column(

@@ -130,9 +130,8 @@ class SubscriptionScreen extends StatelessWidget {
     final isCurrentPlan =
         currentPlan != null && currentPlan['name'] == planName;
     final planPriceNumber = _parsePrice(planPrice);
-    final currentPriceNumber = currentPlan != null
-        ? (currentPlan['price'] ?? 0.0) as double
-        : 0.0;
+    final currentPriceNumber =
+        currentPlan != null ? (currentPlan['price'] ?? 0.0) as double : 0.0;
 
     String buttonText;
     VoidCallback? onPressed;
@@ -233,9 +232,8 @@ class SubscriptionScreen extends StatelessWidget {
   }) {
     final isCurrentPlan = currentPlan != null && currentPlan['name'] == title;
     final planPriceNumber = _parsePrice(price);
-    final currentPriceNumber = currentPlan != null
-        ? (currentPlan['price'] ?? 0.0) as double
-        : 0.0;
+    final currentPriceNumber =
+        currentPlan != null ? (currentPlan['price'] ?? 0.0) as double : 0.0;
 
     String buttonText;
     VoidCallback? onPressed;

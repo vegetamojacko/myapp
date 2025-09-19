@@ -249,7 +249,8 @@ class _EventClaimFormState extends State<EventClaimForm> {
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
                 ),
-                child: Text(widget.claim != null ? 'Update Claim' : 'Submit Claim'),
+                child: Text(
+                    widget.claim != null ? 'Update Claim' : 'Submit Claim'),
               ),
             ],
           ),

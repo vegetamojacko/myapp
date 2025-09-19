@@ -7,7 +7,7 @@ import '../blocs/claims/claims_bloc.dart';
 import '../blocs/claims/claims_event.dart';
 import '../models/claim.dart';
 import '../providers/car_wash_provider.dart';
-import '../providers/banking_provider.dart'; 
+import '../providers/banking_provider.dart';
 import '../models/car_wash.dart';
 
 class CarWashClaimForm extends StatefulWidget {
@@ -32,8 +32,8 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
     super.initState();
     _carRegController = TextEditingController(text: widget.claim?.vehicleReg);
     _washTypeController = TextEditingController(text: widget.claim?.washType);
-    _totalAmountController = TextEditingController(
-        text: widget.claim?.totalAmount.toString() ?? '');
+    _totalAmountController =
+        TextEditingController(text: widget.claim?.totalAmount.toString() ?? '');
     _carWashNameController =
         TextEditingController(text: widget.claim?.carWashName);
     _washDate = widget.claim?.washDate ?? DateTime.now();
@@ -127,7 +127,9 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
                       widget.claim == null
                           ? 'Car Wash Booking'
                           : 'Edit Car Wash Booking',
-                      style: Theme.of(context).textTheme.headlineSmall
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     IconButton(
@@ -173,7 +175,7 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
                   decoration: InputDecoration(
                     labelText: 'Type of Wash',
                     hintText: 'e.g., Full Valet',
-                     border: OutlineInputBorder(
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
@@ -190,7 +192,7 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
                   decoration: InputDecoration(
                     labelText: 'Car Registration',
                     hintText: 'e.g., GP 123 AB',
-                     border: OutlineInputBorder(
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
@@ -207,9 +209,12 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
                 InkWell(
                   onTap: () => _selectDate(context),
                   child: InputDecorator(
-                    decoration: InputDecoration(labelText: 'Date',  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),),
+                    decoration: InputDecoration(
+                      labelText: 'Date',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                     child: Text(
                       _washDate != null
                           ? '${_washDate!.toLocal()}'.split(' ')[0]
@@ -224,7 +229,7 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
                   decoration: InputDecoration(
                     labelText: 'Total Amount',
                     hintText: 'e.g., 250.00',
-                     border: OutlineInputBorder(
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),

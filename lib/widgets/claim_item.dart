@@ -73,8 +73,8 @@ class ClaimItem extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () => context.read<ClaimsBloc>().add(
-                        UpdateClaim(claim.copyWith(status: 'Cancelled')),
-                      ),
+                            UpdateClaim(claim.copyWith(status: 'Cancelled')),
+                          ),
                       child: const Text('Cancel'),
                     ),
                   ],

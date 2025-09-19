@@ -41,12 +41,13 @@ class ClaimsBloc extends Bloc<ClaimsEvent, ClaimsState> {
       },
     );
   }
-  
+
   void _onAddClaim(AddClaim event, Emitter<ClaimsState> emit) async {
     final currentState = state;
     if (currentState is ClaimsLoaded) {
       try {
-        final List<Claim> updatedClaims = List.from(currentState.claims)..insert(0, event.claim);
+        final List<Claim> updatedClaims = List.from(currentState.claims)
+          ..insert(0, event.claim);
         await _storageService.saveClaims(updatedClaims);
         // No need to emit here, the stream will do it
       } catch (e) {
@@ -60,7 +61,9 @@ class ClaimsBloc extends Bloc<ClaimsEvent, ClaimsState> {
     if (currentState is ClaimsLoaded) {
       try {
         final List<Claim> updatedClaims = currentState.claims.map((claim) {
-          return claim.submittedDate == event.claim.submittedDate ? event.claim : claim;
+          return claim.submittedDate == event.claim.submittedDate
+              ? event.claim
+              : claim;
         }).toList();
         await _storageService.saveClaims(updatedClaims);
       } catch (e) {

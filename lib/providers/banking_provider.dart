@@ -20,18 +20,18 @@ class BankingInfo {
   });
 
   Map<String, dynamic> toJson() => {
-    'bankName': bankName,
-    'accountNumber': accountNumber,
-    'accountHolder': accountHolder,
-    'branchCode': branchCode,
-  };
+        'bankName': bankName,
+        'accountNumber': accountNumber,
+        'accountHolder': accountHolder,
+        'branchCode': branchCode,
+      };
 
   factory BankingInfo.fromJson(Map<dynamic, dynamic> json) => BankingInfo(
-    bankName: json['bankName'] ?? '',
-    accountNumber: json['accountNumber'] ?? '',
-    accountHolder: json['accountHolder'] ?? '',
-    branchCode: json['branchCode'],
-  );
+        bankName: json['bankName'] ?? '',
+        accountNumber: json['accountNumber'] ?? '',
+        accountHolder: json['accountHolder'] ?? '',
+        branchCode: json['branchCode'],
+      );
 }
 
 class BankingProvider with ChangeNotifier {
@@ -79,7 +79,8 @@ class BankingProvider with ChangeNotifier {
       final selectedPlanSnapshot = await selectedPlanRef.get();
       if (selectedPlanSnapshot.exists) {
         final data = selectedPlanSnapshot.value as Map<dynamic, dynamic>;
-        _initialAmountAvailable = (data['amountAvailable'] as num?)?.toDouble() ?? 0.0;
+        _initialAmountAvailable =
+            (data['amountAvailable'] as num?)?.toDouble() ?? 0.0;
         _amountAvailable = _initialAmountAvailable;
         _amountUsed = (data['amountUsed'] as num?)?.toDouble() ?? 0.0;
       }
@@ -103,7 +104,8 @@ class BankingProvider with ChangeNotifier {
         if (data is List) {
           claims = data
               .where((item) => item != null && item is Map)
-              .map((item) => Claim.fromJson(Map<String, dynamic>.from(item as Map)))
+              .map((item) =>
+                  Claim.fromJson(Map<String, dynamic>.from(item as Map)))
               .toList();
         } else if (data is Map) {
           for (final item in data.values) {
@@ -150,10 +152,9 @@ class BankingProvider with ChangeNotifier {
     if (currentUser != null) {
       try {
         await _database.ref('users/${currentUser.uid}/bankingInfo').remove();
-        await _database.ref('users/${currentUser.uid}/selectedPlan').update({
-          'amountAvailable': 0,
-          'amountUsed': 0
-        });
+        await _database
+            .ref('users/${currentUser.uid}/selectedPlan')
+            .update({'amountAvailable': 0, 'amountUsed': 0});
         developer.log(
           'Deleted banking info and reset plan amounts for UID: ${currentUser.uid}',
           name: 'BankingProvider',
@@ -195,12 +196,10 @@ class BankingProvider with ChangeNotifier {
     User? currentUser = _auth.currentUser;
     if (currentUser != null) {
       try {
-        await _database
-            .ref('users/${currentUser.uid}/selectedPlan')
-            .update({
-              'amountAvailable': _amountAvailable,
-              'amountUsed': _amountUsed,
-            });
+        await _database.ref('users/${currentUser.uid}/selectedPlan').update({
+          'amountAvailable': _amountAvailable,
+          'amountUsed': _amountUsed,
+        });
         developer.log(
           'Updated selected plan amounts in Realtime Database for UID: ${currentUser.uid}',
           name: 'BankingProvider',

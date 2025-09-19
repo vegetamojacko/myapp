@@ -115,8 +115,8 @@ class _AuthScreenState extends State<AuthScreen> {
             child: _isLoading
                 ? const CircularProgressIndicator()
                 : _isLogin
-                ? _buildLoginForm(context)
-                : _buildRegisterForm(context),
+                    ? _buildLoginForm(context)
+                    : _buildRegisterForm(context),
           ),
         ),
       ),

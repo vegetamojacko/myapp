@@ -113,10 +113,10 @@ class _BankingDetailsScreenState extends State<BankingDetailsScreen> {
                           .read<BankingProvider>()
                           .updateBankingInfo(bankingInfo)
                           .then((_) {
-                            if (mounted) {
-                              router.go('/home');
-                            }
-                          });
+                        if (mounted) {
+                          router.go('/home');
+                        }
+                      });
                     }
                   },
                   child: const Text('Save Banking Details'),

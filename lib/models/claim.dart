@@ -92,8 +92,9 @@ class Claim extends Equatable {
 
   factory Claim.fromJson(Map<dynamic, dynamic> json) {
     final submittedDateString = json['submittedDate'] as String?;
-    final submittedDate = submittedDateString ?? DateTime.now().toIso8601String();
-    
+    final submittedDate =
+        submittedDateString ?? DateTime.now().toIso8601String();
+
     final totalAmountValue = json['totalAmount'];
     double totalAmount = 0.0;
     if (totalAmountValue is num) {
