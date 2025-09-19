@@ -1,12 +1,7 @@
-
-import 'dart:async';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
-
-import '../models/claim.dart';
 
 class BankingInfo {
   final String bankName;
@@ -39,13 +34,10 @@ class BankingInfo {
 class BankingProvider with ChangeNotifier {
   final FirebaseDatabase _database = FirebaseDatabase.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  StreamSubscription<DatabaseEvent>? _claimsSubscription;
 
   BankingInfo? _bankingInfo;
   double _amountAvailable = 0.0;
   double _amountUsed = 0.0;
-  double _initialAmountAvailable = 0.0;
-
 
   BankingInfo? get bankingInfo => _bankingInfo;
   double get amountUsed => _amountUsed;
@@ -83,11 +75,9 @@ class BankingProvider with ChangeNotifier {
       if (selectedPlanSnapshot.exists) {
         final data = selectedPlanSnapshot.value as Map<dynamic, dynamic>;
         // Use 'amountAvailable' from DB which is the total budget initially
-        _initialAmountAvailable = (data['amountAvailable'] as num?)?.toDouble() ?? 0.0;
+        _amountAvailable = (data['amountAvailable'] as num?)?.toDouble() ?? 0.0;
         _amountUsed = (data['amountUsed'] as num?)?.toDouble() ?? 0.0;
-        _amountAvailable = _initialAmountAvailable - _amountUsed;
       }
-      listenToClaims(user);
       notifyListeners();
     } catch (e, s) {
       developer.log(
@@ -98,40 +88,10 @@ class BankingProvider with ChangeNotifier {
     }
   }
 
-  void listenToClaims(User user) {
-    _claimsSubscription?.cancel();
-    final claimsRef = _database.ref('users/${user.uid}/claims');
-    _claimsSubscription = claimsRef.onValue.listen((event) async {
-      if (event.snapshot.exists) {
-        final claimsData = event.snapshot.value as Map<dynamic, dynamic>;
-        final claims = claimsData.entries.map((e) {
-          final claimData = Map<String, dynamic>.from(e.value as Map);
-          claimData['id'] = e.key;
-          return Claim.fromMap(claimData);
-        }).toList();
-
-        double totalApprovedAmount = 0;
-        for (var claim in claims) {
-          if (claim.status == 'Approved') {
-            totalApprovedAmount += claim.totalAmount;
-          }
-        }
-
-        _amountUsed = totalApprovedAmount;
-        _amountAvailable = _initialAmountAvailable - _amountUsed;
-
-        await _updateSelectedPlan();
-        notifyListeners();
-      }
-    });
-  }
-
-
   void clearBankingInfo() {
     _bankingInfo = null;
     _amountAvailable = 0.0;
     _amountUsed = 0.0;
-    _claimsSubscription?.cancel();
     notifyListeners();
   }
 
@@ -147,7 +107,7 @@ class BankingProvider with ChangeNotifier {
         await _database.ref('users/${currentUser.uid}/bankingInfo').remove();
         // Also clear the amounts in the selectedPlan, but don't remove the whole plan
         await _database.ref('users/${currentUser.uid}/selectedPlan').update({
-          'amountAvailable': _initialAmountAvailable,
+          'amountAvailable': 0,
           'amountUsed': 0
         });
         developer.log(
@@ -195,9 +155,9 @@ class BankingProvider with ChangeNotifier {
         await _database
             .ref('users/${currentUser.uid}/selectedPlan')
             .update({
-          'amountAvailable': _initialAmountAvailable,
-          'amountUsed': _amountUsed,
-        });
+              'amountAvailable': _amountAvailable,
+              'amountUsed': _amountUsed,
+            });
         developer.log(
           'Updated selected plan amounts in Realtime Database for UID: ${currentUser.uid}',
           name: 'BankingProvider',
@@ -211,11 +171,5 @@ class BankingProvider with ChangeNotifier {
         );
       }
     }
-  }
-
-  @override
-  void dispose() {
-    _claimsSubscription?.cancel();
-    super.dispose();
   }
 }
