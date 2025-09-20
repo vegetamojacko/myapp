@@ -42,7 +42,7 @@ class BankingProvider with ChangeNotifier {
   double _amountAvailable = 0.0;
   double _amountUsed = 0.0;
   StreamSubscription? _claimsSubscription;
-  bool _isInitialClaimsLoad = true;
+  StreamSubscription? _selectedPlanSubscription;
 
   BankingInfo? get bankingInfo => _bankingInfo;
   double get amountUsed => _amountUsed;
@@ -52,95 +52,119 @@ class BankingProvider with ChangeNotifier {
   Future<void> updateBankingInfo(BankingInfo? bankingInfo) async {
     _bankingInfo = bankingInfo;
     notifyListeners();
-    await _saveBankingInfo();
-  }
-
-  Future<void> updateAmountsOnClaim({
-    required double oldClaimAmount,
-    required double newClaimAmount,
-  }) async {
-    _amountUsed = _amountUsed - oldClaimAmount + newClaimAmount;
-    _amountAvailable = _amountAvailable + oldClaimAmount - newClaimAmount;
-    notifyListeners();
-    await _updateSelectedPlan();
+    await _saveBankingInfo(bankingInfo);
   }
 
   Future<void> loadBankingInfo(User user) async {
-    _isInitialClaimsLoad = true; // Reset flag on new user load
     try {
       final bankingRef = _database.ref('users/${user.uid}/bankingInfo');
-      final selectedPlanRef = _database.ref('users/${user.uid}/selectedPlan');
-
       final bankingSnapshot = await bankingRef.get();
       if (bankingSnapshot.exists) {
         final data = bankingSnapshot.value as Map<dynamic, dynamic>;
         _bankingInfo = BankingInfo.fromJson(data);
+        notifyListeners();
       }
-
-      final selectedPlanSnapshot = await selectedPlanRef.get();
-      if (selectedPlanSnapshot.exists) {
-        final data = selectedPlanSnapshot.value as Map<dynamic, dynamic>;
-        _amountAvailable = (data['amountAvailable'] as num?)?.toDouble() ?? 0.0;
-        _amountUsed = (data['amountUsed'] as num?)?.toDouble() ?? 0.0;
-      }
-      notifyListeners();
     } catch (e, s) {
-      developer.log(
-        'Error loading banking info and selected plan: $e',
-        name: 'BankingProvider',
-        stackTrace: s,
-      );
+      developer.log('Error loading banking info: $e', name: 'BankingProvider', stackTrace: s);
     }
+  }
+
+  void listenToUserChanges(User user) {
+    listenToClaims(user);
+    listenToSelectedPlan(user);
   }
 
   void listenToClaims(User user) {
     _claimsSubscription?.cancel();
     final claimsRef = _database.ref('users/${user.uid}/claims');
-    _claimsSubscription = claimsRef.onValue.listen((event) async {
-      if (_isInitialClaimsLoad) {
-        _isInitialClaimsLoad = false;
-        return; // Do not run calculation on initial load
-      }
 
+    _claimsSubscription = claimsRef.onValue.listen((event) {
+      double newTotalApprovedAmount = 0;
       if (event.snapshot.exists && event.snapshot.value != null) {
         final data = event.snapshot.value;
-        List<Claim> claims = [];
         if (data is List) {
-          claims = data
+          final claims = data
               .where((item) => item != null && item is Map)
-              .map((item) =>
-                  Claim.fromJson(Map<String, dynamic>.from(item as Map)))
+              .map((item) => Claim.fromJson(Map<String, dynamic>.from(item as Map)))
               .toList();
+          for (var claim in claims) {
+            if (claim.status == 'Approved') {
+              newTotalApprovedAmount += claim.totalAmount;
+            }
+          }
         } else if (data is Map) {
-          for (final item in data.values) {
-            if (item != null && item is Map) {
-              try {
-                claims.add(Claim.fromJson(Map<String, dynamic>.from(item)));
-              } catch (e) {
-                developer.log('Error parsing a claim from map: $e');
-              }
+          final claims = data.values
+              .where((item) => item != null && item is Map)
+              .map((item) => Claim.fromJson(Map<String, dynamic>.from(item)))
+              .toList();
+          for (var claim in claims) {
+            if (claim.status == 'Approved') {
+              newTotalApprovedAmount += claim.totalAmount;
             }
           }
         }
+      }
 
-        double newTotalApprovedAmount = 0;
-        for (var claim in claims) {
-          if (claim.status == 'Approved') {
-            newTotalApprovedAmount += claim.totalAmount;
-          }
+      // Run the correction logic within a transaction for safety.
+      _runBalanceTransaction(user.uid, newTotalApprovedAmount);
+    });
+  }
+
+  Future<void> _runBalanceTransaction(String uid, double newTotalApprovedAmount) async {
+    final planRef = _database.ref('users/$uid/selectedPlan');
+    try {
+      await planRef.runTransaction((Object? mutableData) {
+        if (mutableData == null) {
+          return Transaction.abort();
         }
 
-        final double delta = newTotalApprovedAmount - _amountUsed;
+        final Map<String, dynamic> planData = Map<String, dynamic>.from(mutableData as Map);
 
-        if (delta == 0) {
-          return; // No changes in approved claims, so do nothing.
+        final double serverAmountUsed = (planData['amountUsed'] as num?)?.toDouble() ?? 0.0;
+
+        // If the database is already correct, do nothing.
+        if (serverAmountUsed == newTotalApprovedAmount) {
+          return Transaction.success(mutableData);
         }
 
-        _amountUsed += delta;
-        _amountAvailable -= delta;
+        // Get the total value of the plan from the server's current state.
+        final double serverAmountAvailable = (planData['amountAvailable'] as num?)?.toDouble() ?? 0.0;
+        final double totalPlanValue = serverAmountAvailable + serverAmountUsed;
 
-        await _updateSelectedPlan();
-        notifyListeners();
+        // Calculate the new available amount based on the preserved total value.
+        final double newAvailableAmount = totalPlanValue - newTotalApprovedAmount;
+
+        // Set the corrected values.
+        planData['amountUsed'] = newTotalApprovedAmount;
+        planData['amountAvailable'] = newAvailableAmount;
+
+        return Transaction.success(planData);
+      });
+    } catch (e) {
+        developer.log('Transaction failed: $e', name: 'BankingProvider');
+    }
+  }
+
+  void listenToSelectedPlan(User user) {
+    _selectedPlanSubscription?.cancel();
+    final selectedPlanRef = _database.ref('users/${user.uid}/selectedPlan');
+    _selectedPlanSubscription = selectedPlanRef.onValue.listen((event) {
+      if (event.snapshot.exists) {
+        final data = event.snapshot.value as Map<dynamic, dynamic>;
+        final newAmountAvailable = (data['amountAvailable'] as num?)?.toDouble() ?? 0.0;
+        final newAmountUsed = (data['amountUsed'] as num?)?.toDouble() ?? 0.0;
+
+        if (_amountAvailable != newAmountAvailable || _amountUsed != newAmountUsed) {
+          _amountAvailable = newAmountAvailable;
+          _amountUsed = newAmountUsed;
+          notifyListeners();
+        }
+      } else {
+        if (_amountAvailable != 0.0 || _amountUsed != 0.0) {
+          _amountAvailable = 0.0;
+          _amountUsed = 0.0;
+          notifyListeners();
+        }
       }
     });
   }
@@ -149,86 +173,25 @@ class BankingProvider with ChangeNotifier {
     _bankingInfo = null;
     _amountAvailable = 0.0;
     _amountUsed = 0.0;
-    _isInitialClaimsLoad = true;
     _claimsSubscription?.cancel();
+    _selectedPlanSubscription?.cancel();
     notifyListeners();
-  }
-
-  Future<void> deleteBankingInfo() async {
-    _bankingInfo = null;
-    _amountAvailable = 0.0;
-    _amountUsed = 0.0;
-    notifyListeners();
-
-    User? currentUser = _auth.currentUser;
-    if (currentUser != null) {
-      try {
-        await _database.ref('users/${currentUser.uid}/bankingInfo').remove();
-        await _database
-            .ref('users/${currentUser.uid}/selectedPlan')
-            .update({'amountAvailable': 0, 'amountUsed': 0});
-        developer.log(
-          'Deleted banking info and reset plan amounts for UID: ${currentUser.uid}',
-          name: 'BankingProvider',
-        );
-      } catch (e, s) {
-        developer.log(
-          'Error deleting banking info for UID: ${currentUser.uid}',
-          name: 'BankingProvider',
-          error: e,
-          stackTrace: s,
-        );
-      }
-    }
   }
 
   @override
   void dispose() {
     _claimsSubscription?.cancel();
+    _selectedPlanSubscription?.cancel();
     super.dispose();
   }
 
-  Future<void> _saveBankingInfo() async {
+  Future<void> _saveBankingInfo(BankingInfo? bankingInfo) async {
     User? currentUser = _auth.currentUser;
-    if (currentUser != null && _bankingInfo != null) {
+    if (currentUser != null && bankingInfo != null) {
       try {
-        await _database
-            .ref('users/${currentUser.uid}/bankingInfo')
-            .set(_bankingInfo!.toJson());
-        developer.log(
-          'Saved banking info to Realtime Database for UID: ${currentUser.uid}',
-          name: 'BankingProvider',
-        );
+        await _database.ref('users/${currentUser.uid}/bankingInfo').set(bankingInfo.toJson());
       } catch (e, s) {
-        developer.log(
-          'Error saving banking info to Realtime Database for UID: ${currentUser.uid}',
-          name: 'BankingProvider',
-          error: e,
-          stackTrace: s,
-        );
-      }
-    }
-  }
-
-  Future<void> _updateSelectedPlan() async {
-    User? currentUser = _auth.currentUser;
-    if (currentUser != null) {
-      try {
-        await _database.ref('users/${currentUser.uid}/selectedPlan').update({
-          'amountAvailable': _amountAvailable,
-          'amountUsed': _amountUsed,
-        });
-        developer.log(
-          'Updated selected plan amounts in Realtime Database for UID: ${currentUser.uid}',
-          name: 'BankingProvider',
-        );
-      } catch (e, s) {
-        developer.log(
-          'Error updating selected plan amounts for UID: ${currentUser.uid}',
-          name: 'BankingProvider',
-          error: e,
-          stackTrace: s,
-        );
+        developer.log('Error saving banking info for UID: ${currentUser.uid}', name: 'BankingProvider', error: e, stackTrace: s);
       }
     }
   }

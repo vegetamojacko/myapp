@@ -87,7 +87,7 @@ class _MyAppState extends State<MyApp> {
       if (user != null) {
         userProvider.loadUserData(user);
         bankingProvider.loadBankingInfo(user);
-        bankingProvider.listenToClaims(user);
+        bankingProvider.listenToUserChanges(user); // Updated to new method
         claimsBloc.add(LoadClaims());
       } else {
         userProvider.clearUserData();

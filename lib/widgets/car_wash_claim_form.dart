@@ -7,7 +7,6 @@ import '../blocs/claims/claims_bloc.dart';
 import '../blocs/claims/claims_event.dart';
 import '../models/claim.dart';
 import '../providers/car_wash_provider.dart';
-import '../providers/banking_provider.dart';
 import '../models/car_wash.dart';
 
 class CarWashClaimForm extends StatefulWidget {
@@ -41,11 +40,8 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      final bankingProvider = context.read<BankingProvider>();
-
       if (widget.claim != null) {
         // We are updating an existing claim
-        final oldTotalAmount = widget.claim!.totalAmount;
         final newTotalAmount = double.parse(_totalAmountController.text);
 
         final updatedClaim = widget.claim!.copyWith(
@@ -57,10 +53,7 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
           status: 'Pending', // Reset status on update
         );
         context.read<ClaimsBloc>().add(UpdateClaim(updatedClaim));
-        bankingProvider.updateAmountsOnClaim(
-          oldClaimAmount: oldTotalAmount,
-          newClaimAmount: newTotalAmount,
-        );
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Car wash claim updated successfully!'),
@@ -82,10 +75,7 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
           isCarWashClaim: true,
         );
         context.read<ClaimsBloc>().add(AddClaim(newClaim));
-        bankingProvider.updateAmountsOnClaim(
-          oldClaimAmount: 0.0,
-          newClaimAmount: newTotalAmount,
-        );
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Car wash claim submitted successfully!'),
