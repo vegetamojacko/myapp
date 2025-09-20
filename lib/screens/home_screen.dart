@@ -162,19 +162,51 @@ class HomeScreen extends StatelessWidget {
     final bankingProvider = Provider.of<BankingProvider>(context);
     final plan = userProvider.selectedPlan;
 
-    // Check if any claiming is disabled based on available funds
-    final bool isClaimingGloballyDisabled = bankingProvider.isClaimingDisabled;
+    // A user is eligible to attempt a claim if they have a plan with available funds.
+    final bool isEligibleToAttemptClaim =
+        plan != null && bankingProvider.amountAvailable > 0;
 
-    // Original eligibility conditions
-    final bool isEligible = plan != null &&
-        (plan['amountAvailable'] ?? 0.0) >=
-            100 && // This might need adjustment if 'amountAvailable' is solely from BankingProvider now.
-        bankingProvider.bankingInfo != null;
+    // The banking info is required to proceed, but doesn't disable the button.
+    final bool hasBankingInfo = bankingProvider.bankingInfo != null;
+
+    void handleClaimTap(BuildContext context, VoidCallback onProceed) {
+      if (hasBankingInfo) {
+        onProceed();
+      } else {
+        showDialog(
+          context: context,
+          builder: (BuildContext dialogContext) {
+            return AlertDialog(
+              title: const Text('Banking Details Required'),
+              content: const Text(
+                  'Please add your banking details in your profile before making a claim.'),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                  },
+                ),
+                TextButton(
+                  child: const Text('Go to Profile'),
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop(); // Close the dialog
+                    context
+                        .read<NavigationProvider>()
+                        .navigateToPage(2); // Navigate to Profile
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
+    }
 
     // Condition for enabling the event claim button
     final bool canClaimEvent =
-        !isClaimingGloballyDisabled && isEligible && plan['name'] != 'Car Wash';
-    final bool canClaimCarWash = !isClaimingGloballyDisabled && isEligible;
+        isEligibleToAttemptClaim && (plan?['name'] != 'Car Wash');
+    final bool canClaimCarWash = isEligibleToAttemptClaim;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,14 +220,17 @@ class HomeScreen extends StatelessWidget {
               context,
               icon: Icons.event,
               label: 'Claim Event',
-              onTap: canClaimEvent ? () => _showAddClaimSheet(context) : null,
+              onTap: canClaimEvent
+                  ? () => handleClaimTap(context, () => _showAddClaimSheet(context))
+                  : null,
             ),
             _buildActionCard(
               context,
               icon: Icons.directions_car,
               label: 'Claim Car Wash',
               onTap: canClaimCarWash
-                  ? () => _showCarWashClaimSheet(context, claim: null)
+                  ? () => handleClaimTap(
+                      context, () => _showCarWashClaimSheet(context, claim: null))
                   : null,
             ),
             _buildActionCard(

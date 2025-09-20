@@ -104,8 +104,6 @@ class BankingProvider with ChangeNotifier {
           }
         }
       }
-
-      // Run the correction logic within a transaction for safety.
       _runBalanceTransaction(user.uid, newTotalApprovedAmount);
     });
   }
@@ -120,21 +118,33 @@ class BankingProvider with ChangeNotifier {
 
         final Map<String, dynamic> planData = Map<String, dynamic>.from(mutableData as Map);
 
+        final bool isInitialized = planData.containsKey('amountUsed') && planData.containsKey('amountAvailable');
+
+        double totalPlanValue;
+
+        if (!isInitialized) {
+          final double price = (planData['price'] as num?)?.toDouble() ?? 0.0;
+          if (price <= 0) {
+            return Transaction.abort();
+          }
+          totalPlanValue = price * 12;
+          planData['amountUsed'] = 0.0;
+          planData['amountAvailable'] = totalPlanValue;
+        } 
+
         final double serverAmountUsed = (planData['amountUsed'] as num?)?.toDouble() ?? 0.0;
 
-        // If the database is already correct, do nothing.
         if (serverAmountUsed == newTotalApprovedAmount) {
-          return Transaction.success(mutableData);
+          return Transaction.success(planData);
         }
 
-        // Get the total value of the plan from the server's current state.
-        final double serverAmountAvailable = (planData['amountAvailable'] as num?)?.toDouble() ?? 0.0;
-        final double totalPlanValue = serverAmountAvailable + serverAmountUsed;
+        if (isInitialized) {
+            final double serverAmountAvailable = (planData['amountAvailable'] as num?)?.toDouble() ?? 0.0;
+            totalPlanValue = serverAmountAvailable + serverAmountUsed;
+        } 
 
-        // Calculate the new available amount based on the preserved total value.
         final double newAvailableAmount = totalPlanValue - newTotalApprovedAmount;
 
-        // Set the corrected values.
         planData['amountUsed'] = newTotalApprovedAmount;
         planData['amountAvailable'] = newAvailableAmount;
 
