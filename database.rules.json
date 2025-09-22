@@ -1,25 +1,24 @@
 {
   "rules": {
-    // Default to denying all access
     ".read": false,
     ".write": false,
-
     "users": {
       "$uid": {
-        // A user can only read or write to their own user data
         ".read": "auth != null && auth.uid == $uid",
         ".write": "auth != null && auth.uid == $uid"
       }
     },
     "claims": {
       "$uid": {
-        // A user can read all of their own claims
         ".read": "auth != null && auth.uid == $uid",
         "$claimId": {
-           // A user can write (create, update, delete) a specific claim for themselves
           ".write": "auth != null && auth.uid == $uid"
         }
       }
+    },
+    "carWashes": {
+      ".read": "auth != null",
+      ".write": false
     }
   }
 }

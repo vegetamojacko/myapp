@@ -20,10 +20,14 @@ The app uses the Material Design 3 theme, with a color scheme generated from a s
 - The car wash claim form includes a dropdown to select the car wash name from a predefined list.
 - The selected car wash name is stored in the `Claim` model and displayed in the claim details.
 
+### Firebase Integration
+
+- **Project Connection:** The IDE is connected to the `candibean-android-app` Firebase project.
+- **Realtime Database Security Rules:** The rules in `database.rules.json` have been updated to allow authenticated users to read the `carWashes` data, while keeping other data private and secure.
+
 ### Security
 
 - **Firestore Security Rules:** Implemented rules in `firestore.rules` to ensure that users can only create, read, update, or delete their own user data and claims.
-- **Realtime Database Security Rules:** Implemented rules in `database.rules.json` to secure the Realtime Database. Users can only access and modify their own data, and all other database paths are locked down by default.
 
 ### Current Plan
 

@@ -120,7 +120,7 @@ class BankingProvider with ChangeNotifier {
 
         final bool isInitialized = planData.containsKey('amountUsed') && planData.containsKey('amountAvailable');
 
-        double totalPlanValue;
+        double totalPlanValue = 0.0;
 
         if (!isInitialized) {
           final double price = (planData['price'] as num?)?.toDouble() ?? 0.0;
