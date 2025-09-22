@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../blocs/claims/claims_bloc.dart';
 import '../blocs/claims/claims_event.dart';
 import '../models/claim.dart';
+import '../providers/user_provider.dart';
 
 class EventClaimForm extends StatefulWidget {
   final Claim? claim;
@@ -23,10 +25,16 @@ class _EventClaimFormState extends State<EventClaimForm> {
   late TextEditingController _numTicketsController;
   late TextEditingController _deliveryAddressController;
   late DateTime _selectedDate;
+  late final ValueNotifier<bool> _isSubmitEnabled;
+  double _amountAvailable = 0.0;
+  double _totalClaimAmount = 0.0;
 
   @override
   void initState() {
     super.initState();
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    _amountAvailable = userProvider.selectedPlan?['amountAvailable'] ?? 0.0;
+
     _eventNameController = TextEditingController(text: widget.claim?.eventName);
     _ticketCostController = TextEditingController(
       text: widget.claim?.ticketCost?.toString(),
@@ -38,15 +46,37 @@ class _EventClaimFormState extends State<EventClaimForm> {
       text: widget.claim?.deliveryAddress,
     );
     _selectedDate = widget.claim?.eventDate ?? DateTime.now();
+    _isSubmitEnabled = ValueNotifier<bool>(false);
+
+    _ticketCostController.addListener(_validateAmount);
+    _numTicketsController.addListener(_validateAmount);
+
+    // Initial validation check
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _validateAmount();
+    });
   }
 
   @override
   void dispose() {
     _eventNameController.dispose();
+    _ticketCostController.removeListener(_validateAmount);
     _ticketCostController.dispose();
+    _numTicketsController.removeListener(_validateAmount);
     _numTicketsController.dispose();
     _deliveryAddressController.dispose();
+    _isSubmitEnabled.dispose();
     super.dispose();
+  }
+
+  void _validateAmount() {
+    final ticketCost = double.tryParse(_ticketCostController.text) ?? 0.0;
+    final numTickets = int.tryParse(_numTicketsController.text) ?? 0;
+    _totalClaimAmount = ticketCost * numTickets;
+
+    final isAmountValid = _totalClaimAmount > 0 && _totalClaimAmount <= _amountAvailable;
+    _isSubmitEnabled.value = isAmountValid;
+    setState(() {}); // To rebuild the helper text
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -65,20 +95,15 @@ class _EventClaimFormState extends State<EventClaimForm> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      final ticketCost = double.parse(_ticketCostController.text);
-      final numTickets = int.parse(_numTicketsController.text);
-
       if (widget.claim != null) {
         // Update existing claim
-        final newTotalAmount = ticketCost * numTickets;
-
         final updatedClaim = widget.claim!.copyWith(
           eventName: _eventNameController.text,
           eventDate: _selectedDate,
-          ticketCost: ticketCost,
-          numTickets: numTickets,
+          ticketCost: double.parse(_ticketCostController.text),
+          numTickets: int.parse(_numTicketsController.text),
           deliveryAddress: _deliveryAddressController.text,
-          totalAmount: newTotalAmount,
+          totalAmount: _totalClaimAmount,
         );
         context.read<ClaimsBloc>().add(UpdateClaim(updatedClaim));
 
@@ -90,15 +115,14 @@ class _EventClaimFormState extends State<EventClaimForm> {
         );
       } else {
         // Add new claim
-        final newTotalAmount = ticketCost * numTickets;
         final newClaim = Claim(
           id: const Uuid().v4(),
           eventName: _eventNameController.text,
           eventDate: _selectedDate,
-          totalAmount: newTotalAmount,
+          totalAmount: _totalClaimAmount,
           status: 'Pending',
           isCarWashClaim: false,
-          numTickets: numTickets,
+          numTickets: int.parse(_numTicketsController.text),
           deliveryAddress: _deliveryAddressController.text,
           submittedDate: DateTime.now().toIso8601String(),
         );
@@ -203,9 +227,10 @@ class _EventClaimFormState extends State<EventClaimForm> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _numTicketsController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Number of Tickets',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
+                  helperText: 'Total: R$_totalClaimAmount  |  Available: R$_amountAvailable',
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
@@ -214,6 +239,9 @@ class _EventClaimFormState extends State<EventClaimForm> {
                   }
                   if (int.tryParse(value) == null) {
                     return 'Please enter a valid number';
+                  }
+                  if (_totalClaimAmount > _amountAvailable) {
+                    return 'Claim amount exceeds available balance of R$_amountAvailable';
                   }
                   return null;
                 },
@@ -234,13 +262,17 @@ class _EventClaimFormState extends State<EventClaimForm> {
                 },
               ),
               const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _submitForm,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-                child: Text(
-                    widget.claim != null ? 'Update Claim' : 'Submit Claim'),
+              ValueListenableBuilder<bool>(
+                valueListenable: _isSubmitEnabled,
+                builder: (context, isEnabled, child) {
+                  return ElevatedButton(
+                    onPressed: isEnabled ? _submitForm : null,
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 50),
+                    ),
+                    child: Text(widget.claim != null ? 'Update Claim' : 'Submit Claim'),
+                  );
+                },
               ),
             ],
           ),

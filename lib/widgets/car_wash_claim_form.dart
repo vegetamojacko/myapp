@@ -6,6 +6,7 @@ import '../blocs/claims/claims_bloc.dart';
 import '../blocs/claims/claims_event.dart';
 import '../models/claim.dart';
 import '../providers/car_wash_provider.dart';
+import '../providers/user_provider.dart';
 
 class CarWashClaimForm extends StatefulWidget {
   final Claim? claim;
@@ -24,10 +25,14 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
   TextEditingController? _carWashNameController;
   late final ValueNotifier<bool> _isSubmitEnabled;
   DateTime? _washDate;
+  double _amountAvailable = 0.0;
 
   @override
   void initState() {
     super.initState();
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    _amountAvailable = userProvider.selectedPlan?['amountAvailable'] ?? 0.0;
+
     _carRegController = TextEditingController(text: widget.claim?.vehicleReg);
     _washTypeController = TextEditingController(text: widget.claim?.washType);
     _totalAmountController =
@@ -35,11 +40,11 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
     _washDate = widget.claim?.washDate ?? DateTime.now();
     _isSubmitEnabled = ValueNotifier<bool>(false);
 
-    // Defer initial validation to ensure controller is available.
+    _totalAmountController.addListener(_validateAmount);
+
+    // Initial validation check
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _validateCarWashName();
-      }
+      _validateAmount();
     });
   }
 
@@ -48,10 +53,21 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
     _carWashNameController?.removeListener(_validateCarWashName);
     _carRegController.dispose();
     _washTypeController.dispose();
+    _totalAmountController.removeListener(_validateAmount);
     _totalAmountController.dispose();
     _isSubmitEnabled.dispose();
-    // The Autocomplete widget manages its own controller's disposal.
     super.dispose();
+  }
+
+  void _validateAmount() {
+    final amountText = _totalAmountController.text;
+    if (amountText.isEmpty) {
+      _isSubmitEnabled.value = false;
+      return;
+    }
+    final requestedAmount = double.tryParse(amountText);
+    final isAmountValid = requestedAmount != null && requestedAmount <= _amountAvailable;
+    _isSubmitEnabled.value = isAmountValid;
   }
 
   void _validateCarWashName() {
@@ -63,6 +79,7 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
     if (_isSubmitEnabled.value != isNameValid) {
       _isSubmitEnabled.value = isNameValid;
     }
+     _validateAmount();
   }
 
   void _submitForm() {
@@ -256,14 +273,19 @@ class _CarWashClaimFormState extends State<CarWashClaimForm> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
+                   helperText: 'Available: R$_amountAvailable',
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter the total amount';
                   }
-                  if (double.tryParse(value) == null) {
+                  final requestedAmount = double.tryParse(value);
+                  if (requestedAmount == null) {
                     return 'Please enter a valid number';
+                  }
+                  if (requestedAmount > _amountAvailable) {
+                    return 'Amount exceeds available balance of R$_amountAvailable';
                   }
                   return null;
                 },

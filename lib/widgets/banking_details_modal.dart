@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/banking_provider.dart';
-import '../providers/navigation_provider.dart';
 
-void showBankingDetailsModal(
+Future<bool?> showBankingDetailsModal(
   BuildContext context,
   String planName,
   String planPrice,
 ) {
-  showModalBottomSheet(
+  return showModalBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
     builder: (context) => DraggableScrollableSheet(
@@ -65,14 +65,24 @@ class _BankingDetailsFormState extends State<BankingDetailsForm> {
         branchCode: _branchCodeController.text,
       );
       context.read<BankingProvider>().updateBankingInfo(bankingInfo);
-      Navigator.pop(context); // Close the modal
-      context.read<NavigationProvider>().navigateToPage(0);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${widget.planName} selected!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+
+      // Pop the modal and return true to signal success
+      Navigator.pop(context, true);
+
+      // Show SnackBar and navigate to home
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
+            SnackBar(
+              content: Text('${widget.planName} selected!'),
+              backgroundColor: Colors.green,
+            ),
+          )
+          .closed
+          .then((_) {
+        if (context.mounted) {
+          context.go('/home');
+        }
+      });
     }
   }
 
@@ -145,7 +155,7 @@ class _BankingDetailsFormState extends State<BankingDetailsForm> {
             const SizedBox(height: 32),
             ElevatedButton(onPressed: _submitForm, child: const Text('Submit')),
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(context, false), // Return false on cancel
               child: const Text('Cancel'),
             ),
           ],

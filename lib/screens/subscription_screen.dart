@@ -9,29 +9,53 @@ import '../widgets/banking_details_modal.dart';
 class SubscriptionScreen extends StatelessWidget {
   const SubscriptionScreen({super.key});
 
-  void _selectPlan(BuildContext context, String planName, String planPrice) {
+  // Updated to be an async function
+  Future<void> _selectPlan(
+    BuildContext context,
+    String planName,
+    String planPrice,
+  ) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final bankingProvider = Provider.of<BankingProvider>(
-      context,
-      listen: false,
-    );
+    final bankingProvider = Provider.of<BankingProvider>(context, listen: false);
+
+    // Update the subscription plan first
+    userProvider.setSubscription(planName, planPrice);
 
     if (bankingProvider.bankingInfo != null) {
+      // For existing users with banking details, just show confirmation and navigate.
       userProvider.updateSubscription(planName, planPrice);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Successfully changed to $planName!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(
+              SnackBar(
+                content: Text('Successfully changed to $planName!'),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 2),
+              ),
+            )
+            .closed
+            .then((_) {
+              if (context.mounted) {
+                context.go('/home');
+              }
+            });
+      }
     } else {
-      userProvider.updateSubscription(planName, planPrice);
-      showBankingDetailsModal(context, planName, planPrice);
+      // For new users, show the banking details modal.
+      final success = await showBankingDetailsModal(context, planName, planPrice);
+
+      // If the modal was successful, the navigation is handled inside the modal.
+      // If not, the user remains on the subscription screen.
+      if (success != true && context.mounted) {
+        // Optionally, reset the plan if the user cancels.
+        userProvider.clearUserData(); 
+      }
     }
   }
 
   double _parsePrice(String priceString) {
-    final cleanPrice = priceString.replaceAll(RegExp(r'[^\d.]'), '');
+    final cleanPrice = priceString.replaceAll(RegExp(r'[^\\d.]'), '');
     return double.tryParse(cleanPrice) ?? 0.0;
   }
 
@@ -111,7 +135,7 @@ class SubscriptionScreen extends StatelessWidget {
               onPressed: () {
                 context.go('/home');
               },
-              child: const Text('Skip for now'),
+              child: const Text('Not now'),
             ),
             const SizedBox(height: 16),
           ],
